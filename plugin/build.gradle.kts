@@ -18,6 +18,7 @@ dependencies {
 
     implementation("net.fabricmc:tiny-remapper:0.10.4")
     implementation("commons-codec:commons-codec:1.17.1")
+    implementation("com.google.guava:guava:33.4.0-jre")
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("org.vineflower:vineflower:1.10.1")
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")

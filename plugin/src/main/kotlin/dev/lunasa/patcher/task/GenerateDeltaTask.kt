@@ -10,11 +10,16 @@ import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import java.util.jar.JarFile
 import java.util.zip.ZipOutputStream
+import com.google.common.io.ByteStreams
+import com.google.common.io.ByteArrayDataOutput
+import com.nothome.delta.Delta
+import java.util.zip.ZipEntry
 
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class GenerateDeltaTask : DefaultTask() {
     @get:InputFile
     abstract val modifiedJar: Property<File>
+
     @get:InputFile
     abstract val originalJar: Property<File>
 
@@ -23,13 +28,48 @@ abstract class GenerateDeltaTask : DefaultTask() {
 
     @TaskAction
     fun generateDeltas() {
-        val jarDelta = JarDelta()
+        val delta = Delta()
 
         val originalZip = JarFile(originalJar.get())
         val modifiedZip = JarFile(modifiedJar.get())
 
         if (outputJar.get().exists()) outputJar.get().delete()
 
-        jarDelta.computeDelta(originalZip, modifiedZip, ZipOutputStream(outputJar.get().outputStream()))
+        val outputStream = ZipOutputStream(outputJar.get().outputStream())
+
+        val patches = mutableListOf<ByteArray>()
+
+        originalZip.entries().asSequence().forEach { originalEntry ->
+            val modifiedEntry = modifiedZip.getEntry(originalEntry.name)
+
+            if (modifiedEntry != null) {
+                val cleanBytes = ByteStreams.toByteArray(originalZip.getInputStream(originalEntry))
+                val modifiedBytes = ByteStreams.toByteArray(modifiedZip.getInputStream(modifiedEntry))
+
+                val deltaBytes = delta.compute(cleanBytes, modifiedBytes)
+
+                val className = originalEntry.name.replace("/", ".").removeSuffix(".class")
+
+                val output: ByteArrayDataOutput = ByteStreams.newDataOutput()
+
+                output.writeUTF(className)           // Class name
+                output.writeUTF(originalEntry.name)  // Clean class name
+                output.writeUTF(modifiedEntry.name)  // Modified class name
+
+                output.writeInt(deltaBytes.size)
+                output.write(deltaBytes)
+
+                patches.add(output.toByteArray())
+            }
+        }
+
+        patches.forEach { patch ->
+            val patchEntry = ZipEntry("patch/patch_${patches.indexOf(patch)}.bin")
+            outputStream.putNextEntry(patchEntry)
+            outputStream.write(patch)
+            outputStream.closeEntry()
+        }
+
+        outputStream.close()
     }
 }
