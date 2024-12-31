@@ -1,0 +1,15 @@
+--- GameRenderer.java
++++ GameRenderer.java
+@@ -925,11 +925,11 @@
+ 							return GameRenderer.this.client.currentScreen.getClass().getCanonicalName();
+ 						}
+ 					});
+ 					crashReportSection.add("Mouse location", new Callable<String>() {
+ 						public String call() throws Exception {
+-							return String.format("Scaled: (%d, %d). Absolute: (%d, %d)", p, k, Mouse.getX(), Mouse.getY());
++							return String.format("Scaled: (%d, %d). Absolute: (%d, %d)", p, kx, Mouse.getX(), Mouse.getY());
+ 						}
+ 					});
+ 					crashReportSection.add(
+ 						"Screen size",
+ 						new Callable<String>() {

@@ -1,0 +1,16 @@
+--- SurfaceChunkGenerator.java
++++ SurfaceChunkGenerator.java
+@@ -231,12 +231,11 @@
+ 				(double)(g / this.properties.mainNoiseScaleY),
+ 				(double)(f / this.properties.mainNoiseScaleZ)
+ 			);
+ 		this.field_7512 = this.field_4832.method_122(this.field_7512, i, j, k, 5, 33, 5, (double)f, (double)g, (double)f);
+ 		this.field_7513 = this.field_4833.method_122(this.field_7513, i, j, k, 5, 33, 5, (double)f, (double)g, (double)f);
+-		int var37 = false;
+-		int var36 = false;
++
+ 		int l = 0;
+ 		int m = 0;
+ 
+ 		for (int n = 0; n < 5; n++) {
+ 			for (int o = 0; o < 5; o++) {

@@ -1,0 +1,15 @@
+--- LivingEntityRenderer.java
++++ LivingEntityRenderer.java
+@@ -37,11 +37,11 @@
+ 		super(entityRenderDispatcher);
+ 		this.model = entityModel;
+ 		this.shadowSize = f;
+ 	}
+ 
+-	protected <V extends LivingEntity, U extends FeatureRenderer<V>> boolean addFeature(U featureRenderer) {
++	protected <V extends LivingEntity, U extends FeatureRenderer<V>> boolean addFeature(FeatureRenderer featureRenderer) {
+ 		return this.features.add(featureRenderer);
+ 	}
+ 
+ 	protected <V extends LivingEntity, U extends FeatureRenderer<V>> boolean removeFeature(U featureRenderer) {
+ 		return this.features.remove(featureRenderer);

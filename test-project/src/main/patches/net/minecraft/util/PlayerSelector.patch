@@ -1,0 +1,114 @@
+--- PlayerSelector.java
++++ PlayerSelector.java
+@@ -123,11 +123,11 @@
+ 		}
+ 	}
+ 
+ 	private static List<Predicate<Entity>> method_10859(Map<String, String> map, String string) {
+ 		List<Predicate<Entity>> list = Lists.newArrayList();
+-		final String string2 = method_10865(map, "type");
++		String string2 = method_10865(map, "type");
+ 		final boolean bl = string2 != null && string2.startsWith("!");
+ 		if (bl) {
+ 			string2 = string2.substring(1);
+ 		}
+ 
+@@ -140,13 +140,14 @@
+ 						return entity instanceof PlayerEntity;
+ 					}
+ 				});
+ 			}
+ 		} else {
++			String finalString = string2;
+ 			list.add(new Predicate<Entity>() {
+ 				public boolean apply(Entity entity) {
+-					return EntityType.equals(entity, string2) != bl;
++					return EntityType.equals(entity, finalString) != bl;
+ 				}
+ 			});
+ 		}
+ 
+ 		return list;
+@@ -191,11 +192,11 @@
+ 		return list;
+ 	}
+ 
+ 	private static List<Predicate<Entity>> method_10869(Map<String, String> map) {
+ 		List<Predicate<Entity>> list = Lists.newArrayList();
+-		final String string = method_10865(map, "team");
++		String string = method_10865(map, "team");
+ 		final boolean bl = string != null && string.startsWith("!");
+ 		if (bl) {
+ 			string = string.substring(1);
+ 		}
+ 
+@@ -262,20 +263,21 @@
+ 		return list;
+ 	}
+ 
+ 	private static List<Predicate<Entity>> method_10871(Map<String, String> map) {
+ 		List<Predicate<Entity>> list = Lists.newArrayList();
+-		final String string = method_10865(map, "name");
++		String string = method_10865(map, "name");
+ 		final boolean bl = string != null && string.startsWith("!");
+ 		if (bl) {
+ 			string = string.substring(1);
+ 		}
+ 
+ 		if (string != null) {
++			String finalString = string;
+ 			list.add(new Predicate<Entity>() {
+ 				public boolean apply(Entity entity) {
+-					return entity.getTranslationKey().equals(string) != bl;
++					return entity.getTranslationKey().equals(finalString) != bl;
+ 				}
+ 			});
+ 		}
+ 
+ 		return list;
+@@ -366,27 +368,27 @@
+ 					(double)(blockPos.getX() + l + 1),
+ 					(double)(blockPos.getY() + l + 1),
+ 					(double)(blockPos.getZ() + l + 1)
+ 				);
+ 				if (bl && bl3 && !bl2) {
+-					list2.addAll(world.method_8536(class_, predicate2));
++					list2.addAll((java.util.Collection<? extends T>) world.method_8536(class_, predicate2));
+ 				} else {
+ 					list2.addAll(world.getEntitiesInBox(class_, box, predicate2));
+ 				}
+ 			} else if (string.equals("a")) {
+-				list2.addAll(world.method_8536(class_, predicate));
++				list2.addAll((java.util.Collection<? extends T>) world.method_8536(class_, predicate));
+ 			} else if (!string.equals("p") && (!string.equals("r") || bl2)) {
+ 				list2.addAll(world.method_8514(class_, predicate2));
+ 			} else {
+-				list2.addAll(world.method_8536(class_, predicate2));
++				list2.addAll((java.util.Collection<? extends T>) world.method_8536(class_, predicate2));
+ 			}
+ 		} else if (string.equals("a")) {
+-			list2.addAll(world.method_8536(class_, predicate));
++			list2.addAll((java.util.Collection<? extends T>) world.method_8536(class_, predicate));
+ 		} else if (!string.equals("p") && (!string.equals("r") || bl2)) {
+ 			list2.addAll(world.method_8514(class_, predicate2));
+ 		} else {
+-			list2.addAll(world.method_8536(class_, predicate2));
++			list2.addAll((java.util.Collection<? extends T>) world.method_8536(class_, predicate2));
+ 		}
+ 
+ 		return list2;
+ 	}
+ 
+@@ -406,11 +408,11 @@
+ 			});
+ 		}
+ 
+ 		Entity entity = commandSource.getEntity();
+ 		if (entity != null && class_.isAssignableFrom(entity.getClass()) && i == 1 && list.contains(entity) && !"r".equals(string)) {
+-			list = Lists.newArrayList(new Entity[]{entity});
++			list = (List<T>) Lists.newArrayList(new Entity[]{entity});
+ 		}
+ 
+ 		if (i != 0) {
+ 			if (i < 0) {
+ 				Collections.reverse(list);

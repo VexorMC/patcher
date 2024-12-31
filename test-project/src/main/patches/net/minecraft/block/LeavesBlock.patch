@@ -1,0 +1,15 @@
+--- LeavesBlock.java
++++ LeavesBlock.java
+@@ -29,11 +29,11 @@
+ 		this.setOpacity(1);
+ 		this.setSound(GRASS);
+ 	}
+ 
+ 	@Override
+-	public int getColor() {
++	public int getFlowerColor() {
+ 		return FoliageColors.getColor(0.5, 1.0);
+ 	}
+ 
+ 	@Override
+ 	public int getColor(BlockState blockState) {

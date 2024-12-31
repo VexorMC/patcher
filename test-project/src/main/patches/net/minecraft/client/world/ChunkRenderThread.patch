@@ -1,0 +1,15 @@
+--- ChunkRenderThread.java
++++ ChunkRenderThread.java
+@@ -42,11 +42,11 @@
+ 				return;
+ 			}
+ 		}
+ 	}
+ 
+-	protected void method_10137(ChunkBuilder chunkBuilder) throws InterruptedException {
++	public void method_10137(ChunkBuilder chunkBuilder) throws InterruptedException {
+ 		chunkBuilder.getLock().lock();
+ 
+ 		try {
+ 			if (chunkBuilder.getRenderStatus() != ChunkBuilder.RenderStatus.PENDING) {
+ 				if (!chunkBuilder.method_10121()) {

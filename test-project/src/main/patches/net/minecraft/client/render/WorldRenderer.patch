@@ -1,0 +1,95 @@
+--- WorldRenderer.java
++++ WorldRenderer.java
+@@ -1988,17 +1988,17 @@
+ 				}
+ 
+ 				this.client.particleManager.addBlockBreakParticles(blockPos, block.stateFromData(j >> 12 & 0xFF));
+ 				break;
+ 			case 2002:
+-				double s = (double)blockPos.getX();
+-				double d = (double)blockPos.getY();
+-				double e = (double)blockPos.getZ();
++				double x = (double)blockPos.getX();
++				double y = (double)blockPos.getY();
++				double z = (double)blockPos.getZ();
+ 
+ 				for (int t = 0; t < 8; t++) {
+ 					this.addParticleInternal(
+-						ParticleType.ITEM_CRACK, s, d, e, random.nextGaussian() * 0.15, random.nextDouble() * 0.2, random.nextGaussian() * 0.15, Item.getRawId(Items.POTION), j
++						ParticleType.ITEM_CRACK, x, y, z, random.nextGaussian() * 0.15, random.nextDouble() * 0.2, random.nextGaussian() * 0.15, Item.getRawId(Items.POTION), j
+ 					);
+ 				}
+ 
+ 				int t = Items.POTION.getColor(j);
+ 				float u = (float)(t >> 16 & 0xFF) / 255.0F;
+@@ -2007,53 +2007,53 @@
+ 				ParticleType particleType = ParticleType.SPELL;
+ 				if (Items.POTION.isInstant(j)) {
+ 					particleType = ParticleType.INSTANT_SPELL;
+ 				}
+ 
+-				for (int x = 0; x < 100; x++) {
+-					double y = random.nextDouble() * 4.0;
+-					double z = random.nextDouble() * Math.PI * 2.0;
++				for (int b = 0; b < 100; b++) {
++					y = random.nextDouble() * 4.0;
++					z = random.nextDouble() * Math.PI * 2.0;
+ 					double aa = Math.cos(z) * y;
+ 					double ab = 0.01 + random.nextDouble() * 0.5;
+ 					double ac = Math.sin(z) * y;
+-					Particle particle = this.addParticleInternal(particleType.getId(), particleType.getAlwaysShow(), s + aa * 0.1, d + 0.3, e + ac * 0.1, aa, ab, ac);
++					Particle particle = this.addParticleInternal(particleType.getId(), particleType.getAlwaysShow(), b + aa * 0.1, y + 0.3, z + ac * 0.1, aa, ab, ac);
+ 					if (particle != null) {
+ 						float ad = 0.75F + random.nextFloat() * 0.25F;
+ 						particle.setColor(u * ad, v * ad, w * ad);
+ 						particle.move((float)y);
+ 					}
+ 				}
+ 
+ 				this.world.playSound(blockPos, "game.potion.smash", 1.0F, this.world.random.nextFloat() * 0.1F + 0.9F, false);
+ 				break;
+ 			case 2003:
+-				double s = (double)blockPos.getX() + 0.5;
+-				double d = (double)blockPos.getY();
+-				double e = (double)blockPos.getZ() + 0.5;
++				x = (double)blockPos.getX() + 0.5;
++				y = (double)blockPos.getY();
++				z = (double)blockPos.getZ() + 0.5;
+ 
+-				for (int t = 0; t < 8; t++) {
++				for (int g = 0; g < 8; g++) {
+ 					this.addParticleInternal(
+ 						ParticleType.ITEM_CRACK,
+-						s,
+-						d,
+-						e,
++						x,
++						y,
++						z,
+ 						random.nextGaussian() * 0.15,
+ 						random.nextDouble() * 0.2,
+ 						random.nextGaussian() * 0.15,
+ 						Item.getRawId(Items.EYE_OF_ENDER)
+ 					);
+ 				}
+ 
+-				for (double f = 0.0; f < Math.PI * 2; f += Math.PI / 20) {
+-					this.addParticleInternal(ParticleType.NETHER_PORTAL, s + Math.cos(f) * 5.0, d - 0.4, e + Math.sin(f) * 5.0, Math.cos(f) * -5.0, 0.0, Math.sin(f) * -5.0);
+-					this.addParticleInternal(ParticleType.NETHER_PORTAL, s + Math.cos(f) * 5.0, d - 0.4, e + Math.sin(f) * 5.0, Math.cos(f) * -7.0, 0.0, Math.sin(f) * -7.0);
++				for (double h = 0.0; h < Math.PI * 2; h += Math.PI / 20) {
++					this.addParticleInternal(ParticleType.NETHER_PORTAL, x + Math.cos(h) * 5.0, y - 0.4, z + Math.sin(h) * 5.0, Math.cos(h) * -5.0, 0.0, Math.sin(h) * -5.0);
++					this.addParticleInternal(ParticleType.NETHER_PORTAL, x + Math.cos(h) * 5.0, y - 0.4, z + Math.sin(h) * 5.0, Math.cos(h) * -7.0, 0.0, Math.sin(h) * -7.0);
+ 				}
+ 				break;
+ 			case 2004:
+-				for (int x = 0; x < 20; x++) {
+-					double y = (double)blockPos.getX() + 0.5 + ((double)this.world.random.nextFloat() - 0.5) * 2.0;
+-					double z = (double)blockPos.getY() + 0.5 + ((double)this.world.random.nextFloat() - 0.5) * 2.0;
++				for (int c = 0; c < 20; c++) {
++					y = (double)blockPos.getX() + 0.5 + ((double)this.world.random.nextFloat() - 0.5) * 2.0;
++					z = (double)blockPos.getY() + 0.5 + ((double)this.world.random.nextFloat() - 0.5) * 2.0;
+ 					double aa = (double)blockPos.getZ() + 0.5 + ((double)this.world.random.nextFloat() - 0.5) * 2.0;
+ 					this.world.addParticle(ParticleType.SMOKE, y, z, aa, 0.0, 0.0, 0.0, new int[0]);
+ 					this.world.addParticle(ParticleType.FIRE, y, z, aa, 0.0, 0.0, 0.0, new int[0]);
+ 				}
+ 				break;

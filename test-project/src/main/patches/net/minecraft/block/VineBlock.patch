@@ -1,0 +1,15 @@
+--- VineBlock.java
++++ VineBlock.java
+@@ -169,11 +169,11 @@
+ 			return true;
+ 		}
+ 	}
+ 
+ 	@Override
+-	public int getColor() {
++	public int getFlowerColor() {
+ 		return FoliageColors.getDefaultColor();
+ 	}
+ 
+ 	@Override
+ 	public int getColor(BlockState blockState) {

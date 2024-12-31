@@ -1,0 +1,15 @@
+--- NetworkUtils.java
++++ NetworkUtils.java
+@@ -108,11 +108,11 @@
+ 	}
+ 
+ 	public static ListenableFuture<Object> downloadResourcePack(
+ 		File file, String string, Map<String, String> map, int i, ProgressListener progressListener, Proxy proxy
+ 	) {
+-		return downloadExecutor.submit(new Runnable() {
++		return (ListenableFuture<Object>) downloadExecutor.submit(new Runnable() {
+ 			public void run() {
+ 				HttpURLConnection httpURLConnection = null;
+ 				InputStream inputStream = null;
+ 				OutputStream outputStream = null;
+ 				if (progressListener != null) {

@@ -1,0 +1,15 @@
+--- IntegratedServer.java
++++ IntegratedServer.java
+@@ -123,11 +123,11 @@
+ 		this.setMotd(this.getUserName() + " - " + this.worlds[0].getLevelProperties().getLevelName());
+ 		return true;
+ 	}
+ 
+ 	@Override
+-	protected void setupWorld() {
++	public void setupWorld() {
+ 		boolean bl = this.paused;
+ 		this.paused = MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().isPaused();
+ 		if (!bl && this.paused) {
+ 			LOGGER.info("Saving and pausing game...");
+ 			this.getPlayerManager().saveAllPlayerData();

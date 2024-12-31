@@ -1,0 +1,15 @@
+--- LilyPadBlock.java
++++ LilyPadBlock.java
+@@ -36,11 +36,11 @@
+ 			(double)blockPos.getZ() + this.boundingBoxMaxZ
+ 		);
+ 	}
+ 
+ 	@Override
+-	public int getColor() {
++	public int getFlowerColor() {
+ 		return 7455580;
+ 	}
+ 
+ 	@Override
+ 	public int getColor(BlockState blockState) {

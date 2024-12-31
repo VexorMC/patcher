@@ -1,0 +1,28 @@
+--- NetworkState.java
++++ NetworkState.java
+@@ -297,22 +297,22 @@
+ 			}
+ 
+ 			NetworkState.networkStates[k - field_11566] = networkState;
+ 
+ 			for (NetworkSide networkSide : networkState.packetClasses.keySet()) {
+-				for (Class<? extends Packet> class_ : ((BiMap)networkState.packetClasses.get(networkSide)).values()) {
++				for (Object class_ : ((BiMap)networkState.packetClasses.get(networkSide)).values()) {
+ 					if (PACKET_TO_STATE.containsKey(class_) && PACKET_TO_STATE.get(class_) != networkState) {
+ 						throw new Error("Packet " + class_ + " is already assigned to protocol " + PACKET_TO_STATE.get(class_) + " - can't reassign to " + networkState);
+ 					}
+ 
+ 					try {
+-						class_.newInstance();
++						((Class)class_).newInstance();
+ 					} catch (Throwable var10) {
+ 						throw new Error("Packet " + class_ + " fails instantiation checks! " + class_);
+ 					}
+ 
+-					PACKET_TO_STATE.put(class_, networkState);
++					PACKET_TO_STATE.put((Class<? extends Packet>) class_, networkState);
+ 				}
+ 			}
+ 		}
+ 	}
+ }

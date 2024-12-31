@@ -1,0 +1,24 @@
+--- BeaconBlock.java
++++ BeaconBlock.java
+@@ -82,17 +82,17 @@
+ 	@Override
+ 	public RenderLayer getRenderLayerType() {
+ 		return RenderLayer.CUTOUT;
+ 	}
+ 
+-	public static void updateState(World world, BlockPos blockPos) {
++	public static void updateState(World world, BlockPos mainPos) {
+ 		NetworkUtils.downloadExecutor.submit(new Runnable() {
+ 			public void run() {
+-				Chunk chunk = world.getChunk(blockPos);
++				Chunk chunk = world.getChunk(mainPos);
+ 
+-				for (int i = blockPos.getY() - 1; i >= 0; i--) {
+-					final BlockPos blockPos = new BlockPos(blockPos.getX(), i, blockPos.getZ());
++				for (int i = mainPos.getY() - 1; i >= 0; i--) {
++					final BlockPos blockPos = new BlockPos(mainPos.getX(), i, mainPos.getZ());
+ 					if (!chunk.hasDirectSunlight(blockPos)) {
+ 						break;
+ 					}
+ 
+ 					BlockState blockState = world.getBlockState(blockPos);

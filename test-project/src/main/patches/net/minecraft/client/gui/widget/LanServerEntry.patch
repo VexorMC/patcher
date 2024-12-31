@@ -1,0 +1,15 @@
+--- LanServerEntry.java
++++ LanServerEntry.java
+@@ -9,11 +9,11 @@
+ 	private final MultiplayerScreen parent;
+ 	protected final MinecraftClient client;
+ 	protected final LanServerQueryManager.LanServerInfo serverInfo;
+ 	private long time = 0L;
+ 
+-	protected LanServerEntry(MultiplayerScreen multiplayerScreen, LanServerQueryManager.LanServerInfo lanServerInfo) {
++	public LanServerEntry(MultiplayerScreen multiplayerScreen, LanServerQueryManager.LanServerInfo lanServerInfo) {
+ 		this.parent = multiplayerScreen;
+ 		this.serverInfo = lanServerInfo;
+ 		this.client = MinecraftClient.getInstance();
+ 	}
+ 

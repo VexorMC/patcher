@@ -1,0 +1,15 @@
+--- MinecraftClient.java
++++ MinecraftClient.java
+@@ -267,11 +267,11 @@
+ 	private final Queue<FutureTask<?>> tasks = Queues.newArrayDeque();
+ 	private long frameTime = 0L;
+ 	private final Thread currentThread = Thread.currentThread();
+ 	private BakedModelManager modelManager;
+ 	private BlockRenderManager blockRenderManager;
+-	volatile boolean running = true;
++	public volatile boolean running = true;
+ 	public String fpsDebugString = "";
+ 	public boolean wireFrame = false;
+ 	public boolean chunkPath = false;
+ 	public boolean chunkVisibility = false;
+ 	public boolean chunkCullingEnabled = true;

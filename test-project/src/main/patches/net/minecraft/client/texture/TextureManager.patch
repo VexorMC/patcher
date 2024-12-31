@@ -1,0 +1,43 @@
+--- TextureManager.java
++++ TextureManager.java
+@@ -45,33 +45,34 @@
+ 		} else {
+ 			return false;
+ 		}
+ 	}
+ 
+-	public boolean loadTexture(Identifier identifier, Texture texture) {
++	public boolean loadTexture(Identifier identifier, Texture actTex) {
+ 		boolean bl = true;
+ 
+ 		try {
+-			texture.load(this.resourceManager);
++			actTex.load(this.resourceManager);
+ 		} catch (IOException var8) {
+ 			LOGGER.warn("Failed to load texture: " + identifier, var8);
+-			texture = TextureUtil.MISSING_TEXTURE;
+-			this.textures.put(identifier, texture);
++			actTex = TextureUtil.MISSING_TEXTURE;
++			this.textures.put(identifier, actTex);
+ 			bl = false;
+ 		} catch (Throwable var9) {
+ 			CrashReport crashReport = CrashReport.create(var9, "Registering texture");
+ 			CrashReportSection crashReportSection = crashReport.addElement("Resource location being registered");
+ 			crashReportSection.add("Resource location", identifier);
++			Texture finalActTex = actTex;
+ 			crashReportSection.add("Texture object class", new Callable<String>() {
+ 				public String call() throws Exception {
+-					return texture.getClass().getName();
++					return finalActTex.getClass().getName();
+ 				}
+ 			});
+ 			throw new CrashException(crashReport);
+ 		}
+ 
+-		this.textures.put(identifier, texture);
++		this.textures.put(identifier, actTex);
+ 		return bl;
+ 	}
+ 
+ 	public Texture getTexture(Identifier identifier) {
+ 		return (Texture)this.textures.get(identifier);

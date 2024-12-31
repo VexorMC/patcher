@@ -1,0 +1,36 @@
+--- World.java
++++ World.java
+@@ -2123,28 +2123,28 @@
+ 		}
+ 
+ 		return list;
+ 	}
+ 
+-	public <T extends Entity> List<T> method_8514(Class<? extends T> class_, Predicate<? super T> predicate) {
++	public <T extends Entity> List<T> method_8514(Class<? extends T> class_, Predicate<Entity> predicate) {
+ 		List<T> list = Lists.newArrayList();
+ 
+ 		for (Entity entity : this.loadedEntities) {
+ 			if (class_.isAssignableFrom(entity.getClass()) && predicate.apply(entity)) {
+-				list.add(entity);
++				list.add((T)entity);
+ 			}
+ 		}
+ 
+ 		return list;
+ 	}
+ 
+-	public <T extends Entity> List<T> method_8536(Class<? extends T> class_, Predicate<? super T> predicate) {
++	public <T extends Entity> List<T> method_8536(Class<? extends T> class_, Predicate<T> predicate) {
+ 		List<T> list = Lists.newArrayList();
+ 
+ 		for (Entity entity : this.playerEntities) {
+-			if (class_.isAssignableFrom(entity.getClass()) && predicate.apply(entity)) {
+-				list.add(entity);
++			if (class_.isAssignableFrom(entity.getClass()) && predicate.apply((T)entity)) {
++				list.add((T)entity);
+ 			}
+ 		}
+ 
+ 		return list;
+ 	}

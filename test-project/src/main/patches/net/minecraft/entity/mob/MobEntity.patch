@@ -1,0 +1,15 @@
+--- MobEntity.java
++++ MobEntity.java
+@@ -733,11 +733,11 @@
+ 	public boolean isPersistent() {
+ 		return this.persistent;
+ 	}
+ 
+ 	@Override
+-	public final boolean openInventory(PlayerEntity playerEntity) {
++	public boolean openInventory(PlayerEntity playerEntity) {
+ 		if (this.isLeashed() && this.getLeashOwner() == playerEntity) {
+ 			this.detachLeash(true, !playerEntity.abilities.creativeMode);
+ 			return true;
+ 		} else {
+ 			ItemStack itemStack = playerEntity.inventory.getMainHandStack();

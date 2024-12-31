@@ -1,0 +1,28 @@
+--- SnooperScreen.java
++++ SnooperScreen.java
+@@ -42,19 +42,19 @@
+ 				this.enableButton = new ButtonWidget(1, this.width / 2 - 152, this.height - 30, 150, 20, this.options.getValueMessage(GameOptions.Option.SNOOPER_ENABLED))
+ 			);
+ 		this.buttons.add(new ButtonWidget(2, this.width / 2 + 2, this.height - 30, 150, 20, I18n.translate("gui.done")));
+ 		boolean bl = this.client.getServer() != null && this.client.getServer().getSnooper() != null;
+ 
+-		for (Entry<String, String> entry : new TreeMap(this.client.getSnooper().getAllInfo()).entrySet()) {
+-			this.entryNames.add((bl ? "C " : "") + (String)entry.getKey());
+-			this.entryValues.add(this.textRenderer.trimToWidth((String)entry.getValue(), this.width - 220));
++		for (Entry<String, String> entry : new TreeMap<>(this.client.getSnooper().getAllInfo()).entrySet()) {
++			this.entryNames.add((bl ? "C " : "") + entry.getKey());
++			this.entryValues.add(this.textRenderer.trimToWidth(entry.getValue(), this.width - 220));
+ 		}
+ 
+ 		if (bl) {
+-			for (Entry<String, String> entry : new TreeMap(this.client.getServer().getSnooper().getAllInfo()).entrySet()) {
+-				this.entryNames.add("S " + (String)entry.getKey());
+-				this.entryValues.add(this.textRenderer.trimToWidth((String)entry.getValue(), this.width - 220));
++			for (Entry<String, String> entry : new TreeMap<>(this.client.getServer().getSnooper().getAllInfo()).entrySet()) {
++				this.entryNames.add("S " + entry.getKey());
++				this.entryValues.add(this.textRenderer.trimToWidth(entry.getValue(), this.width - 220));
+ 			}
+ 		}
+ 
+ 		this.entryList = new SnooperScreen.SnooperEntryListWidget();
+ 	}

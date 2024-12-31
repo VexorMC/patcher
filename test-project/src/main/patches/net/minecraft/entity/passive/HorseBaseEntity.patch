@@ -1,0 +1,20 @@
+--- HorseBaseEntity.java
++++ HorseBaseEntity.java
+@@ -636,15 +636,16 @@
+ 		}
+ 
+ 		return this.field_6896;
+ 	}
+ 
+-	public void openInventory(PlayerEntity playerEntity) {
++	public boolean openInventory(PlayerEntity playerEntity) {
+ 		if (!this.world.isClient && (this.rider == null || this.rider == playerEntity) && this.isTame()) {
+ 			this.inventory.setName(this.getTranslationKey());
+ 			playerEntity.openHorseInventory(this, this.inventory);
+ 		}
++		return false;
+ 	}
+ 
+ 	@Override
+ 	public boolean method_2537(PlayerEntity playerEntity) {
+ 		ItemStack itemStack = playerEntity.inventory.getMainHandStack();

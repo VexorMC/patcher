@@ -1,0 +1,15 @@
+--- LowercaseEnumTypeAdapterFactory.java
++++ LowercaseEnumTypeAdapterFactory.java
+@@ -12,11 +12,11 @@
+ import java.util.Locale;
+ import java.util.Map;
+ 
+ public class LowercaseEnumTypeAdapterFactory implements TypeAdapterFactory {
+ 	public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+-		Class<T> class_ = typeToken.getRawType();
++		Class<T> class_ = (Class<T>) typeToken.getRawType();
+ 		if (!class_.isEnum()) {
+ 			return null;
+ 		} else {
+ 			final Map<String, T> map = Maps.newHashMap();
+ 

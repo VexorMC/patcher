@@ -1,0 +1,15 @@
+--- Block.java
++++ Block.java
+@@ -633,11 +633,11 @@
+ 
+ 	public final double getMaxZ() {
+ 		return this.boundingBoxMaxZ;
+ 	}
+ 
+-	public int getColor() {
++	public int getFlowerColor() {
+ 		return 16777215;
+ 	}
+ 
+ 	public int getColor(BlockState blockState) {
+ 		return 16777215;

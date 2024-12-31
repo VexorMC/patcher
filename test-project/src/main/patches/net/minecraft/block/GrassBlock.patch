@@ -1,0 +1,22 @@
+--- GrassBlock.java
++++ GrassBlock.java
+@@ -28,17 +28,17 @@
+ 		Block block = blockView.getBlockState(blockPos.up()).getBlock();
+ 		return blockState.with(SNOWY, block == Blocks.SNOW || block == Blocks.SNOW_LAYER);
+ 	}
+ 
+ 	@Override
+-	public int getColor() {
++	public int getFlowerColor() {
+ 		return GrassColors.getColor(0.5, 1.0);
+ 	}
+ 
+ 	@Override
+ 	public int getColor(BlockState blockState) {
+-		return this.getColor();
++		return this.getFlowerColor();
+ 	}
+ 
+ 	@Override
+ 	public int getBlockColor(BlockView blockView, BlockPos blockPos, int i) {
+ 		return BiomeColors.getGrassColor(blockView, blockPos);

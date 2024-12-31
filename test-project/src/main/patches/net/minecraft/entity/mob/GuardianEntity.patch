@@ -1,0 +1,15 @@
+--- GuardianEntity.java
++++ GuardianEntity.java
+@@ -349,11 +349,11 @@
+ 			int k = 6000;
+ 			int l = 2;
+ 			if ((this.ticksAlive + this.getEntityId()) % 1200 == 0) {
+ 				StatusEffect statusEffect = StatusEffect.MINING_FATIGUE;
+ 
+-				for (ServerPlayerEntity serverPlayerEntity : this.world.method_8536(ServerPlayerEntity.class, new Predicate<ServerPlayerEntity>() {
++				for (ServerPlayerEntity serverPlayerEntity : this.world.<ServerPlayerEntity>method_8536(ServerPlayerEntity.class, new Predicate<ServerPlayerEntity>() {
+ 					public boolean apply(ServerPlayerEntity serverPlayerEntity) {
+ 						return GuardianEntity.this.squaredDistanceTo(serverPlayerEntity) < 2500.0 && serverPlayerEntity.interactionManager.isSurvival();
+ 					}
+ 				})) {
+ 					if (!serverPlayerEntity.hasStatusEffect(statusEffect)

@@ -1,0 +1,15 @@
+--- BlockEntityRenderDispatcher.java
++++ BlockEntityRenderDispatcher.java
+@@ -58,11 +58,11 @@
+ 	}
+ 
+ 	public <T extends BlockEntity> BlockEntityRenderer<T> render(Class<? extends BlockEntity> class_) {
+ 		BlockEntityRenderer<? extends BlockEntity> blockEntityRenderer = (BlockEntityRenderer<? extends BlockEntity>)this.renderers.get(class_);
+ 		if (blockEntityRenderer == null && class_ != BlockEntity.class) {
+-			blockEntityRenderer = this.render(class_.getSuperclass());
++			blockEntityRenderer = this.render((Class<? extends BlockEntity>) class_.getSuperclass());
+ 			this.renderers.put(class_, blockEntityRenderer);
+ 		}
+ 
+ 		return (BlockEntityRenderer<T>)blockEntityRenderer;
+ 	}

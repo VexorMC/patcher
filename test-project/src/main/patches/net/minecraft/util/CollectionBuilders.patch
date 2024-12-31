@@ -1,0 +1,28 @@
+--- CollectionBuilders.java
++++ CollectionBuilders.java
+@@ -41,11 +41,11 @@
+ 	static class Object2ListFunction<T> implements Function<Object[], List<T>> {
+ 		private Object2ListFunction() {
+ 		}
+ 
+ 		public List<T> apply(Object[] objects) {
+-			return Arrays.asList(objects);
++			return (List<T>) Arrays.asList(objects);
+ 		}
+ 	}
+ 
+ 	static class Product<T> implements Iterable<T[]> {
+ 		private final Class<T> clazz;
+@@ -121,11 +121,11 @@
+ 
+ 					return this.field_11449 >= 0;
+ 				}
+ 			}
+ 
+-			public T[] method_10521() {
++			public T[] next() {
+ 				if (!this.hasNext()) {
+ 					throw new NoSuchElementException();
+ 				} else {
+ 					while (this.field_11449 < this.field_11451.length) {
+ 						this.field_11452[this.field_11449] = (T)this.field_11451[this.field_11449].next();

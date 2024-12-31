@@ -1,0 +1,15 @@
+--- IronGolemLookGoal.java
++++ IronGolemLookGoal.java
+@@ -18,11 +18,11 @@
+ 		if (!this.golem.world.isDay()) {
+ 			return false;
+ 		} else if (this.golem.getRandom().nextInt(8000) != 0) {
+ 			return false;
+ 		} else {
+-			this.targetVillager = this.golem.world.getEntitiesByClass(VillagerEntity.class, this.golem.getBoundingBox().expand(6.0, 2.0, 6.0), this.golem);
++			this.targetVillager = (VillagerEntity) this.golem.world.getEntitiesByClass(VillagerEntity.class, this.golem.getBoundingBox().expand(6.0, 2.0, 6.0), this.golem);
+ 			return this.targetVillager != null;
+ 		}
+ 	}
+ 
+ 	@Override

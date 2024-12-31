@@ -1,0 +1,27 @@
+--- EntityRenderDispatcher.java
++++ EntityRenderDispatcher.java
+@@ -194,22 +194,22 @@
+ 	}
+ 
+ 	public <T extends Entity> EntityRenderer<T> getRenderer(Class<? extends Entity> class_) {
+ 		EntityRenderer<? extends Entity> entityRenderer = (EntityRenderer<? extends Entity>)this.renderers.get(class_);
+ 		if (entityRenderer == null && class_ != Entity.class) {
+-			entityRenderer = this.getRenderer(class_.getSuperclass());
++			entityRenderer = this.getRenderer((Class<? extends Entity>) class_.getSuperclass());
+ 			this.renderers.put(class_, entityRenderer);
+ 		}
+ 
+ 		return (EntityRenderer<T>)entityRenderer;
+ 	}
+ 
+ 	public <T extends Entity> EntityRenderer<T> getRenderer(Entity entity) {
+ 		if (entity instanceof AbstractClientPlayerEntity) {
+ 			String string = ((AbstractClientPlayerEntity)entity).getModel();
+ 			PlayerEntityRenderer playerEntityRenderer = (PlayerEntityRenderer)this.modelRenderers.get(string);
+-			return playerEntityRenderer != null ? playerEntityRenderer : this.playerRenderer;
++			return (EntityRenderer<T>) (playerEntityRenderer != null ? playerEntityRenderer : this.playerRenderer);
+ 		} else {
+ 			return this.getRenderer(entity.getClass());
+ 		}
+ 	}
+ 

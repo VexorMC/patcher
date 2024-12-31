@@ -1,0 +1,18 @@
+--- StoneSlabItem.java
++++ StoneSlabItem.java
+@@ -89,13 +89,13 @@
+ 	}
+ 
+ 	private boolean doubleSlab(ItemStack itemStack, World world, BlockPos blockPos, Object object) {
+ 		BlockState blockState = world.getBlockState(blockPos);
+ 		if (blockState.getBlock() == this.singleSlab) {
+-			Comparable comparable = blockState.get((Property<Comparable>)this.singleSlab.getSlabProperty());
++			Comparable comparable = blockState.get(this.singleSlab.getSlabProperty());
+ 			if (comparable == object) {
+-				BlockState blockState2 = this.doubleSlab.getDefaultState().with(this.singleSlab.getSlabProperty(), comparable);
++				BlockState blockState2 = this.doubleSlab.getDefaultState().with((Property)this.singleSlab.getSlabProperty(), comparable);
+ 				if (world.hasEntityIn(this.doubleSlab.getCollisionBox(world, blockPos, blockState2)) && world.setBlockState(blockPos, blockState2, 3)) {
+ 					world.playSound(
+ 						(double)((float)blockPos.getX() + 0.5F),
+ 						(double)((float)blockPos.getY() + 0.5F),
+ 						(double)((float)blockPos.getZ() + 0.5F),

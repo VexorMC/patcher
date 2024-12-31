@@ -1,0 +1,46 @@
+--- FlowerBlock.java
++++ FlowerBlock.java
+@@ -18,38 +18,38 @@
+ 
+ 	protected FlowerBlock() {
+ 		this.setDefaultState(
+ 			this.stateManager
+ 				.getDefaultState()
+-				.with(this.getFlowerProperties(), this.getColor() == FlowerBlock.Color.RED ? FlowerBlock.FlowerType.POPPY : FlowerBlock.FlowerType.DANDELION)
++				.with(this.getFlowerProperties(), this.getColorFlower() == FlowerBlock.Color.RED ? FlowerBlock.FlowerType.POPPY : FlowerBlock.FlowerType.DANDELION)
+ 		);
+ 	}
+ 
+ 	@Override
+ 	public int getMeta(BlockState blockState) {
+ 		return ((FlowerBlock.FlowerType)blockState.get(this.getFlowerProperties())).getDataIndex();
+ 	}
+ 
+ 	@Override
+ 	public void appendItemStacks(Item item, ItemGroup itemGroup, List<ItemStack> list) {
+-		for (FlowerBlock.FlowerType flowerType : FlowerBlock.FlowerType.getTypes(this.getColor())) {
++		for (FlowerBlock.FlowerType flowerType : FlowerBlock.FlowerType.getTypes(this.getColorFlower())) {
+ 			list.add(new ItemStack(item, 1, flowerType.getDataIndex()));
+ 		}
+ 	}
+ 
+ 	@Override
+ 	public BlockState stateFromData(int i) {
+-		return this.getDefaultState().with(this.getFlowerProperties(), FlowerBlock.FlowerType.getType(this.getColor(), i));
++		return this.getDefaultState().with(this.getFlowerProperties(), FlowerBlock.FlowerType.getType(this.getColorFlower(), i));
+ 	}
+ 
+-	public abstract FlowerBlock.Color getColor();
++	public abstract FlowerBlock.Color getColorFlower();
+ 
+ 	public Property<FlowerBlock.FlowerType> getFlowerProperties() {
+ 		if (this.flowerProperties == null) {
+ 			this.flowerProperties = EnumProperty.of("type", FlowerBlock.FlowerType.class, new Predicate<FlowerBlock.FlowerType>() {
+ 				public boolean apply(FlowerBlock.FlowerType flowerType) {
+-					return flowerType.getColor() == FlowerBlock.this.getColor();
++					return flowerType.getColor() == FlowerBlock.this.getColorFlower();
+ 				}
+ 			});
+ 		}
+ 
+ 		return this.flowerProperties;

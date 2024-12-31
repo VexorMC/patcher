@@ -1,0 +1,39 @@
+--- BlockModelShapes.java
++++ BlockModelShapes.java
+@@ -266,11 +266,11 @@
+ 		});
+ 		this.putBlock(Blocks.DIRT, new BlockStateIdentifierMap() {
+ 			@Override
+ 			protected ModelIdentifier getBlockStateIdentifier(BlockState blockState) {
+ 				Map<Property, Comparable> map = Maps.newLinkedHashMap(blockState.getPropertyMap());
+-				String string = DirtBlock.VARIANT.name((Comparable)map.remove(DirtBlock.VARIANT));
++				String string = DirtBlock.VARIANT.name((DirtBlock.DirtType) map.remove(DirtBlock.VARIANT));
+ 				if (DirtBlock.DirtType.PODZOL != blockState.get(DirtBlock.VARIANT)) {
+ 					map.remove(DirtBlock.SNOWY);
+ 				}
+ 
+ 				return new ModelIdentifier(string, this.getPropertyStateString(map));
+@@ -278,21 +278,21 @@
+ 		});
+ 		this.putBlock(Blocks.DOUBLE_STONE_SLAB, new BlockStateIdentifierMap() {
+ 			@Override
+ 			protected ModelIdentifier getBlockStateIdentifier(BlockState blockState) {
+ 				Map<Property, Comparable> map = Maps.newLinkedHashMap(blockState.getPropertyMap());
+-				String string = StoneSlabBlock.VARIANT.name((Comparable)map.remove(StoneSlabBlock.VARIANT));
++				String string = StoneSlabBlock.VARIANT.name((StoneSlabBlock.SlabType) map.remove(StoneSlabBlock.VARIANT));
+ 				map.remove(StoneSlabBlock.SEAMLESS);
+ 				String string2 = blockState.get(StoneSlabBlock.SEAMLESS) ? "all" : "normal";
+ 				return new ModelIdentifier(string + "_double_slab", string2);
+ 			}
+ 		});
+ 		this.putBlock(Blocks.DOUBLE_STONE_SLAB2, new BlockStateIdentifierMap() {
+ 			@Override
+ 			protected ModelIdentifier getBlockStateIdentifier(BlockState blockState) {
+ 				Map<Property, Comparable> map = Maps.newLinkedHashMap(blockState.getPropertyMap());
+-				String string = RedSandstoneSlabBlock.VARIANT.name((Comparable)map.remove(RedSandstoneSlabBlock.VARIANT));
++				String string = RedSandstoneSlabBlock.VARIANT.name((RedSandstoneSlabBlock.SlabType) map.remove(RedSandstoneSlabBlock.VARIANT));
+ 				map.remove(StoneSlabBlock.SEAMLESS);
+ 				String string2 = blockState.get(RedSandstoneSlabBlock.SEAMLESS) ? "all" : "normal";
+ 				return new ModelIdentifier(string + "_double_slab", string2);
+ 			}
+ 		});

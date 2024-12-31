@@ -1,0 +1,15 @@
+--- ServerEntry.java
++++ ServerEntry.java
+@@ -38,11 +38,11 @@
+ 	private final Identifier iconTextureId;
+ 	private String iconUri;
+ 	private NativeImageBackedTexture icon;
+ 	private long time;
+ 
+-	protected ServerEntry(MultiplayerScreen multiplayerScreen, ServerInfo serverInfo) {
++	public ServerEntry(MultiplayerScreen multiplayerScreen, ServerInfo serverInfo) {
+ 		this.parent = multiplayerScreen;
+ 		this.serverInfo = serverInfo;
+ 		this.client = MinecraftClient.getInstance();
+ 		this.iconTextureId = new Identifier("servers/" + serverInfo.address + "/icon");
+ 		this.icon = (NativeImageBackedTexture)this.client.getTextureManager().getTexture(this.iconTextureId);

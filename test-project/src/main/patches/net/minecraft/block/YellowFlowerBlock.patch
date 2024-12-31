@@ -1,0 +1,12 @@
+--- YellowFlowerBlock.java
++++ YellowFlowerBlock.java
+@@ -1,8 +1,8 @@
+ package net.minecraft.block;
+ 
+ public class YellowFlowerBlock extends FlowerBlock {
+ 	@Override
+-	public FlowerBlock.Color getColor() {
++	public FlowerBlock.Color getColorFlower() {
+ 		return FlowerBlock.Color.YELLOW;
+ 	}
+ }

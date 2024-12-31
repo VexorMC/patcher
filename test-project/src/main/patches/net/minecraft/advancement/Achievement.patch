@@ -1,0 +1,14 @@
+--- Achievement.java
++++ Achievement.java
+@@ -32,10 +32,11 @@
+ 		super(string, new TranslatableText("achievement." + string2));
+ 		this.logo = itemStack;
+ 		this.translationKey = "achievement." + string2 + ".desc";
+ 		this.column = i;
+ 		this.row = j;
++
+ 		if (i < AchievementsAndCriterions.minColumn) {
+ 			AchievementsAndCriterions.minColumn = i;
+ 		}
+ 
+ 		if (j < AchievementsAndCriterions.minRow) {

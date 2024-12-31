@@ -1,0 +1,313 @@
+--- SpawnerBlockEntityBehavior.java
++++ SpawnerBlockEntityBehavior.java
+@@ -1,13 +1,297 @@
+-// $VF: Couldn't be decompiled
+-// Please report this to the Vineflower issue tracker, at https://github.com/Vineflower/vineflower/issues with a copy of the class file (if you have the rights to distribute it!)
+-// java.lang.RuntimeException: java.lang.NullPointerException: Cannot invoke "String.isEmpty()" because "keyField" is null
+-//   at org.jetbrains.java.decompiler.main.ClassesProcessor.processClass(ClassesProcessor.java:439)
+-//   at org.jetbrains.java.decompiler.main.Fernflower.processClass(Fernflower.java:183)
+-//   at org.jetbrains.java.decompiler.struct.ContextUnit.lambda$save$2(ContextUnit.java:164)
+-// Caused by: java.lang.NullPointerException: Cannot invoke "String.isEmpty()" because "keyField" is null
+-//   at org.jetbrains.java.decompiler.main.rels.NestedClassProcessor.getMaskLocalVars(NestedClassProcessor.java:747)
+-//   at org.jetbrains.java.decompiler.main.rels.NestedClassProcessor.computeLocalVarsAndDefinitions(NestedClassProcessor.java:338)
+-//   at org.jetbrains.java.decompiler.main.rels.NestedClassProcessor.processClass(NestedClassProcessor.java:67)
+-//   at org.jetbrains.java.decompiler.main.ClassesProcessor.processClass(ClassesProcessor.java:431)
+-//   at org.jetbrains.java.decompiler.main.Fernflower.processClass(Fernflower.java:183)
+-//   at org.jetbrains.java.decompiler.struct.ContextUnit.lambda$save$2(ContextUnit.java:164)
++package net.minecraft.block.entity;
++
++import com.google.common.collect.Lists;
++import java.util.Iterator;
++import java.util.List;
++import net.minecraft.client.particle.ParticleType;
++import net.minecraft.entity.Entity;
++import net.minecraft.entity.EntityType;
++import net.minecraft.entity.mob.MobEntity;
++import net.minecraft.entity.vehicle.AbstractMinecartEntity;
++import net.minecraft.nbt.NbtCompound;
++import net.minecraft.nbt.NbtElement;
++import net.minecraft.nbt.NbtList;
++import net.minecraft.util.ChatUtil;
++import net.minecraft.util.collection.Weighting;
++import net.minecraft.util.math.BlockPos;
++import net.minecraft.util.math.Box;
++import net.minecraft.world.World;
++
++public abstract class SpawnerBlockEntityBehavior {
++    private int spawnDelay = 20;
++
++    private String entityId = "Pig";
++
++    private final List<SpawnEntry> spawnPotentials = Lists.newArrayList();
++
++    private SpawnEntry spawnEntry;
++
++    private double mobAngleNext;
++
++    private double mobAngle;
++
++    private int minSpawnDelay = 200;
++
++    private int maxSpawnDelay = 800;
++
++    private int spawnCount = 4;
++
++    private Entity renderedEntity;
++
++    private int maxNearbyEntities = 6;
++
++    private int requiredPlayerRange = 16;
++
++    private int spawnRange = 4;
++
++    private String getEntityId() {
++        if (setSpawnEntry() == null) {
++            if (this.entityId != null && this.entityId.equals("Minecart"))
++                this.entityId = "MinecartRideable";
++            return this.entityId;
++        }
++        return (setSpawnEntry()).getNbt().getString("EntityId");
++    }
++
++    public void setEntityId(String string) {
++        this.entityId = string;
++    }
++
++    private boolean isPlayerInRange() {
++        BlockPos blockPos = getPos();
++        return getWorld().isPlayerInRange(blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ() + 0.5D, this.requiredPlayerRange);
++    }
++
++    public void tick() {
++        if (!isPlayerInRange())
++            return;
++        BlockPos blockPos = getPos();
++        if ((getWorld()).isClient) {
++            double d = (blockPos.getX() + (getWorld()).random.nextFloat());
++            double e = (blockPos.getY() + (getWorld()).random.nextFloat());
++            double f = (blockPos.getZ() + (getWorld()).random.nextFloat());
++            getWorld().addParticle(ParticleType.SMOKE, d, e, f, 0.0D, 0.0D, 0.0D, new int[0]);
++            getWorld().addParticle(ParticleType.FIRE, d, e, f, 0.0D, 0.0D, 0.0D, new int[0]);
++            if (this.spawnDelay > 0)
++                this.spawnDelay--;
++            this.mobAngle = this.mobAngleNext;
++            this.mobAngleNext = (this.mobAngleNext + (1000.0F / (this.spawnDelay + 200.0F))) % 360.0D;
++        } else {
++            if (this.spawnDelay == -1)
++                updateSpawns();
++            if (this.spawnDelay > 0) {
++                this.spawnDelay--;
++                return;
++            }
++            boolean bl = false;
++            for (int i = 0; i < this.spawnCount; i++) {
++                Entity entity = EntityType.createInstanceFromName(getEntityId(), getWorld());
++                if (entity == null)
++                    return;
++                int j = getWorld().getEntitiesInBox(entity.getClass(), (new Box(blockPos.getX(), blockPos.getY(), blockPos.getZ(), (blockPos.getX() + 1), (blockPos.getY() + 1), (blockPos.getZ() + 1))).expand(this.spawnRange, this.spawnRange, this.spawnRange)).size();
++                if (j >= this.maxNearbyEntities) {
++                    updateSpawns();
++                    return;
++                }
++                double f = blockPos.getX() + ((getWorld()).random.nextDouble() - (getWorld()).random.nextDouble()) * this.spawnRange + 0.5D;
++                double g = (blockPos.getY() + (getWorld()).random.nextInt(3) - 1);
++                double h = blockPos.getZ() + ((getWorld()).random.nextDouble() - (getWorld()).random.nextDouble()) * this.spawnRange + 0.5D;
++                MobEntity mobEntity = (entity instanceof MobEntity) ? (MobEntity)entity : null;
++                entity.refreshPositionAndAngles(f, g, h, (getWorld()).random.nextFloat() * 360.0F, 0.0F);
++                if (mobEntity == null || (mobEntity.canSpawn() && mobEntity.hasNoSpawnCollisions())) {
++                    spawnEntity(entity, true);
++                    getWorld().syncGlobalEvent(2004, blockPos, 0);
++                    if (mobEntity != null)
++                        mobEntity.playSpawnEffects();
++                    bl = true;
++                }
++            }
++            if (bl)
++                updateSpawns();
++        }
++    }
++
++    private Entity spawnEntity(Entity entity, boolean bl) {
++        if (setSpawnEntry() != null) {
++            NbtCompound nbtCompound = new NbtCompound();
++            entity.saveToNbt(nbtCompound);
++            for (Iterator<String> iterator = (setSpawnEntry()).getNbt().getKeys().iterator(); iterator.hasNext(); ) {
++                String string = iterator.next();
++                NbtElement nbtElement = (setSpawnEntry()).getNbt().get(string);
++                nbtCompound.put(string, nbtElement.copy());
++            }
++            entity.fromNbt(nbtCompound);
++            if (entity.world != null && bl)
++                entity.world.spawnEntity(entity);
++            Entity entity2 = entity;
++            while (nbtCompound.contains("Riding", 10)) {
++                NbtCompound nbtCompound2 = nbtCompound.getCompound("Riding");
++                Entity entity3 = EntityType.createInstanceFromName(nbtCompound2.getString("id"), entity.world);
++                if (entity3 != null) {
++                    NbtCompound nbtCompound3 = new NbtCompound();
++                    entity3.saveToNbt(nbtCompound3);
++                    for (Iterator<String> iterator2 = nbtCompound2.getKeys().iterator(); iterator2.hasNext(); ) {
++                        String string2 = iterator2.next();
++                        NbtElement nbtElement2 = nbtCompound2.get(string2);
++                        nbtCompound3.put(string2, nbtElement2.copy());
++                    }
++                    entity3.fromNbt(nbtCompound3);
++                    entity3.refreshPositionAndAngles(entity2.x, entity2.y, entity2.z, entity2.yaw, entity2.pitch);
++                    if (entity.world != null && bl)
++                        entity.world.spawnEntity(entity3);
++                    entity2.startRiding(entity3);
++                }
++                entity2 = entity3;
++                nbtCompound = nbtCompound2;
++            }
++        } else if (entity instanceof net.minecraft.entity.LivingEntity && entity.world != null && bl) {
++            if (entity instanceof MobEntity)
++                ((MobEntity)entity).initialize(entity.world.getLocalDifficulty(new BlockPos(entity)), null);
++            entity.world.spawnEntity(entity);
++        }
++        return entity;
++    }
++
++    private void updateSpawns() {
++        if (this.maxSpawnDelay <= this.minSpawnDelay) {
++            this.spawnDelay = this.minSpawnDelay;
++        } else {
++            this.spawnDelay = this.minSpawnDelay + (getWorld()).random.nextInt(this.maxSpawnDelay - this.minSpawnDelay);
++        }
++        if (this.spawnPotentials.size() > 0)
++            setSpawnEntry((SpawnEntry)Weighting.rand((getWorld()).random, this.spawnPotentials));
++        sendStatus(1);
++    }
++
++    public void deserialize(NbtCompound nbtCompound) {
++        this.entityId = nbtCompound.getString("EntityId");
++        this.spawnDelay = nbtCompound.getShort("Delay");
++        this.spawnPotentials.clear();
++        if (nbtCompound.contains("SpawnPotentials", 9)) {
++            NbtList nbtList = nbtCompound.getList("SpawnPotentials", 10);
++            for (int i = 0; i < nbtList.size(); i++)
++                this.spawnPotentials.add(new SpawnEntry(nbtList.getCompound(i)));
++        }
++        if (nbtCompound.contains("SpawnData", 10)) {
++            setSpawnEntry(new SpawnEntry(nbtCompound.getCompound("SpawnData"), this.entityId));
++        } else {
++            setSpawnEntry(null);
++        }
++        if (nbtCompound.contains("MinSpawnDelay", 99)) {
++            this.minSpawnDelay = nbtCompound.getShort("MinSpawnDelay");
++            this.maxSpawnDelay = nbtCompound.getShort("MaxSpawnDelay");
++            this.spawnCount = nbtCompound.getShort("SpawnCount");
++        }
++        if (nbtCompound.contains("MaxNearbyEntities", 99)) {
++            this.maxNearbyEntities = nbtCompound.getShort("MaxNearbyEntities");
++            this.requiredPlayerRange = nbtCompound.getShort("RequiredPlayerRange");
++        }
++        if (nbtCompound.contains("SpawnRange", 99))
++            this.spawnRange = nbtCompound.getShort("SpawnRange");
++        if (getWorld() != null)
++            this.renderedEntity = null;
++    }
++
++    public void serialize(NbtCompound nbtCompound) {
++        String string = getEntityId();
++        if (ChatUtil.isEmpty(string))
++            return;
++        nbtCompound.putString("EntityId", string);
++        nbtCompound.putShort("Delay", (short)this.spawnDelay);
++        nbtCompound.putShort("MinSpawnDelay", (short)this.minSpawnDelay);
++        nbtCompound.putShort("MaxSpawnDelay", (short)this.maxSpawnDelay);
++        nbtCompound.putShort("SpawnCount", (short)this.spawnCount);
++        nbtCompound.putShort("MaxNearbyEntities", (short)this.maxNearbyEntities);
++        nbtCompound.putShort("RequiredPlayerRange", (short)this.requiredPlayerRange);
++        nbtCompound.putShort("SpawnRange", (short)this.spawnRange);
++        if (setSpawnEntry() != null)
++            nbtCompound.put("SpawnData", setSpawnEntry().getNbt().copy());
++        if (setSpawnEntry() != null || this.spawnPotentials.size() > 0) {
++            NbtList nbtList = new NbtList();
++            if (this.spawnPotentials.size() > 0) {
++                for (Iterator<SpawnEntry> iterator = this.spawnPotentials.iterator(); iterator.hasNext(); ) {
++                    SpawnEntry spawnEntry = iterator.next();
++                    nbtList.add((NbtElement)spawnEntry.getNbt());
++                }
++            } else {
++                nbtList.add((NbtElement)setSpawnEntry().getNbt());
++            }
++            nbtCompound.put("SpawnPotentials", (NbtElement)nbtList);
++        }
++    }
++
++    public Entity getRenderedEntity(World world) {
++        if (this.renderedEntity == null) {
++            Entity entity = EntityType.createInstanceFromName(getEntityId(), world);
++            if (entity != null) {
++                entity = spawnEntity(entity, false);
++                this.renderedEntity = entity;
++            }
++        }
++        return this.renderedEntity;
++    }
++
++    public boolean handleStatus(int i) {
++        if (i == 1 && (getWorld()).isClient) {
++            this.spawnDelay = this.minSpawnDelay;
++            return true;
++        }
++        return false;
++    }
++
++    private SpawnEntry setSpawnEntry() {
++        return this.spawnEntry;
++    }
++
++    public void setSpawnEntry(SpawnEntry spawnEntry) {
++        this.spawnEntry = spawnEntry;
++    }
++
++    public abstract void sendStatus(int paramInt);
++
++    public abstract World getWorld();
++
++    public abstract BlockPos getPos();
++
++    public double method_8463() {
++        return this.mobAngleNext;
++    }
++
++    public double method_8464() {
++        return this.mobAngle;
++    }
++
++    public class SpawnEntry extends Weighting.Weight {
++        private final NbtCompound properties;
++
++        private final String entityName;
++
++        public SpawnEntry(NbtCompound nbtCompound) {
++            this(nbtCompound.getCompound("Properties"), nbtCompound.getString("Type"), nbtCompound.getInt("Weight"));
++        }
++
++        public SpawnEntry(NbtCompound nbtCompound, String string) {
++            this(nbtCompound, string, 1);
++        }
++
++        private SpawnEntry(NbtCompound nbtCompound, String string, int i) {
++            super(i);
++            if (string.equals("Minecart"))
++                if (nbtCompound != null) {
++                    string = AbstractMinecartEntity.Type.getById(nbtCompound.getInt("Type")).getName();
++                } else {
++                    string = "MinecartRideable";
++                }
++            this.properties = nbtCompound;
++            this.entityName = string;
++        }
++
++        public NbtCompound getNbt() {
++            NbtCompound nbtCompound = new NbtCompound();
++            nbtCompound.put("Properties", (NbtElement)this.properties);
++            nbtCompound.putString("Type", this.entityName);
++            nbtCompound.putInt("Weight", this.weight);
++            return nbtCompound;
++        }
++    }
++}

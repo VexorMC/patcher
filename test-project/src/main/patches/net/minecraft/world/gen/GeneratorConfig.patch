@@ -1,0 +1,15 @@
+--- GeneratorConfig.java
++++ GeneratorConfig.java
+@@ -10,11 +10,11 @@
+ import net.minecraft.util.math.BlockBox;
+ import net.minecraft.util.math.ChunkPos;
+ import net.minecraft.world.World;
+ 
+ public abstract class GeneratorConfig {
+-	protected LinkedList<StructurePiece> children = new LinkedList();
++	public LinkedList<StructurePiece> children = new LinkedList();
+ 	protected BlockBox boundingBox;
+ 	private int chunkX;
+ 	private int chunkZ;
+ 
+ 	public GeneratorConfig() {

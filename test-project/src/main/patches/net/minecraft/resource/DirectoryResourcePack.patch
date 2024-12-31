@@ -1,0 +1,32 @@
+--- DirectoryResourcePack.java
++++ DirectoryResourcePack.java
+@@ -1,13 +1,11 @@
+ package net.minecraft.resource;
+ 
+ import com.google.common.collect.Sets;
+-import java.io.BufferedInputStream;
+-import java.io.File;
+-import java.io.FileInputStream;
+-import java.io.IOException;
+-import java.io.InputStream;
++
++import java.io.*;
++import java.util.Objects;
+ import java.util.Set;
+ import org.apache.commons.io.filefilter.DirectoryFileFilter;
+ 
+ public class DirectoryResourcePack extends AbstractFileResourcePack {
+ 	public DirectoryResourcePack(File file) {
+@@ -27,11 +25,11 @@
+ 	@Override
+ 	public Set<String> getNamespaces() {
+ 		Set<String> set = Sets.newHashSet();
+ 		File file = new File(this.base, "assets/");
+ 		if (file.isDirectory()) {
+-			for (File file2 : file.listFiles(DirectoryFileFilter.DIRECTORY)) {
++			for (File file2 : Objects.requireNonNull(file.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY))) {
+ 				String string = relativize(file, file2);
+ 				if (!string.equals(string.toLowerCase())) {
+ 					this.warnNonLowercaseNamespace(string);
+ 				} else {
+ 					set.add(string.substring(0, string.length() - 1));

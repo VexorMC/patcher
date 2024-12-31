@@ -1,0 +1,15 @@
+--- BlockStateMap.java
++++ BlockStateMap.java
+@@ -27,11 +27,11 @@
+ 		Map<Property, Comparable> map = Maps.newLinkedHashMap(blockState.getPropertyMap());
+ 		String string;
+ 		if (this.defaultProperty == null) {
+ 			string = Block.REGISTRY.getIdentifier(blockState.getBlock()).toString();
+ 		} else {
+-			string = ((Property<Object>)this.defaultProperty).name((Comparable)map.remove(this.defaultProperty));
++			string = ((Property)this.defaultProperty).name((Comparable)map.remove(this.defaultProperty));
+ 		}
+ 
+ 		if (this.suffix != null) {
+ 			string = string + this.suffix;
+ 		}

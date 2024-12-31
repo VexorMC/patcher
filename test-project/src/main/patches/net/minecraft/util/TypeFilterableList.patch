@@ -1,0 +1,15 @@
+--- TypeFilterableList.java
++++ TypeFilterableList.java
+@@ -62,11 +62,11 @@
+ 	}
+ 
+ 	private void method_10803(T object, Class<?> class_) {
+ 		List<T> list = (List<T>)this.elementsByType.get(class_);
+ 		if (list == null) {
+-			this.elementsByType.put(class_, Lists.newArrayList(new Object[]{object}));
++			this.elementsByType.put(class_, (List<T>) Lists.newArrayList(new Object[]{object}));
+ 		} else {
+ 			list.add(object);
+ 		}
+ 	}
+ 
