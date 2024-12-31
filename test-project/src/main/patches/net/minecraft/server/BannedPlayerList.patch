@@ -1,0 +1,15 @@
+--- BannedPlayerList.java
++++ BannedPlayerList.java
+@@ -13,11 +13,11 @@
+ 	protected ServerConfigEntry<GameProfile> fromJson(JsonObject jsonObject) {
+ 		return new BannedPlayerEntry(jsonObject);
+ 	}
+ 
+ 	public boolean contains(GameProfile gameProfile) {
+-		return this.contains(gameProfile);
++		return super.contains(gameProfile);
+ 	}
+ 
+ 	@Override
+ 	public String[] getNames() {
+ 		String[] strings = new String[this.values().size()];

@@ -1,0 +1,48 @@
+--- BatEntity.java
++++ BatEntity.java
+@@ -21,11 +21,11 @@
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+ 		super.initDataTracker();
+-		this.dataTracker.track(16, new Byte((byte)0));
++		this.dataTracker.track(16, (byte) 0);
+ 	}
+ 
+ 	@Override
+ 	protected float getSoundVolume() {
+ 		return 0.1F;
+@@ -118,11 +118,11 @@
+ 				this.field_5365 = null;
+ 			}
+ 
+ 			if (this.field_5365 == null
+ 				|| this.random.nextInt(30) == 0
+-				|| this.field_5365.squaredDistanceTo((double)((int)this.x), (double)((int)this.y), (double)((int)this.z)) < 4.0) {
++				|| this.field_5365.squaredDistanceTo((int)this.x, (int)this.y, (int)this.z) < 4.0) {
+ 				this.field_5365 = new BlockPos(
+ 					(int)this.x + this.random.nextInt(7) - this.random.nextInt(7),
+ 					(int)this.y + this.random.nextInt(6) - 2,
+ 					(int)this.z + this.random.nextInt(7) - this.random.nextInt(7)
+ 				);
+@@ -199,16 +199,17 @@
+ 				j = 7;
+ 			} else if (this.random.nextBoolean()) {
+ 				return false;
+ 			}
+ 
+-			return i > this.random.nextInt(j) ? false : super.canSpawn();
++			return i <= this.random.nextInt(j) && super.canSpawn();
+ 		}
+ 	}
+ 
+ 	private boolean method_11069(Calendar calendar) {
+-		return calendar.get(2) + 1 == 10 && calendar.get(5) >= 20 || calendar.get(2) + 1 == 11 && calendar.get(5) <= 3;
++		return calendar.get(Calendar.MONTH) + 1 == 10 && calendar.get(Calendar.DATE) >= 20
++				|| calendar.get(Calendar.MONTH) + 1 == 11 && calendar.get(Calendar.DATE) <= 3;
+ 	}
+ 
+ 	@Override
+ 	public float getEyeHeight() {
+ 		return this.height / 2.0F;

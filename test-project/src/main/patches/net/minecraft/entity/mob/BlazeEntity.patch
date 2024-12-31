@@ -1,0 +1,42 @@
+--- BlazeEntity.java
++++ BlazeEntity.java
+@@ -31,11 +31,11 @@
+ 		this.goals.add(5, new GoToWalkTargetGoal(this, 1.0));
+ 		this.goals.add(7, new WanderAroundGoal(this, 1.0));
+ 		this.goals.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
+ 		this.goals.add(8, new LookAroundGoal(this));
+ 		this.attackGoals.add(1, new RevengeGoal(this, true));
+-		this.attackGoals.add(2, new FollowTargetGoal(this, PlayerEntity.class, true));
++		this.attackGoals.add(2, new FollowTargetGoal<>(this, PlayerEntity.class, true));
+ 	}
+ 
+ 	@Override
+ 	protected void initializeAttributes() {
+ 		super.initializeAttributes();
+@@ -45,11 +45,11 @@
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+ 		super.initDataTracker();
+-		this.dataTracker.track(16, new Byte((byte)0));
++		this.dataTracker.track(16, (byte) 0);
+ 	}
+ 
+ 	@Override
+ 	protected String getAmbientSound() {
+ 		return "mob.blaze.breathe";
+@@ -168,11 +168,12 @@
+ 	protected boolean method_3087() {
+ 		return true;
+ 	}
+ 
+ 	static class ShootFireballGoal extends Goal {
+-		private BlazeEntity blaze;
++		private final BlazeEntity blaze;
++
+ 		private int fireballsFired;
+ 		private int cooldown;
+ 
+ 		public ShootFireballGoal(BlazeEntity blazeEntity) {
+ 			this.blaze = blazeEntity;

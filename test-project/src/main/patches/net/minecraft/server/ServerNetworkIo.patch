@@ -1,0 +1,28 @@
+--- ServerNetworkIo.java
++++ ServerNetworkIo.java
+@@ -103,11 +103,11 @@
+ 											.addLast("legacy_query", new LegacyQueryHandler(ServerNetworkIo.this))
+ 											.addLast("splitter", new SplitterHandler())
+ 											.addLast("decoder", new DecoderHandler(NetworkSide.SERVERBOUND))
+ 											.addLast("prepender", new SizePrepender())
+ 											.addLast("encoder", new PacketEncoder(NetworkSide.CLIENTBOUND));
+-										ClientConnection clientConnection = new ClientConnection(NetworkSide.SERVERBOUND);
++										ClientConnection clientConnection = new ClientConnection();
+ 										ServerNetworkIo.this.connections.add(clientConnection);
+ 										channel.pipeline().addLast("packet_handler", clientConnection);
+ 										clientConnection.setPacketListener(new ServerHandshakeNetworkHandler(ServerNetworkIo.this.server, clientConnection));
+ 									}
+ 								}
+@@ -124,11 +124,11 @@
+ 		ChannelFuture channelFuture;
+ 		synchronized (this.channels) {
+ 			channelFuture = ((ServerBootstrap)((ServerBootstrap)new ServerBootstrap().channel(LocalServerChannel.class))
+ 					.childHandler(new ChannelInitializer<Channel>() {
+ 						protected void initChannel(Channel channel) throws Exception {
+-							ClientConnection clientConnection = new ClientConnection(NetworkSide.SERVERBOUND);
++							ClientConnection clientConnection = new ClientConnection();
+ 							clientConnection.setPacketListener(new IntegratedServerHandshakeNetworkHandler(ServerNetworkIo.this.server, clientConnection));
+ 							ServerNetworkIo.this.connections.add(clientConnection);
+ 							channel.pipeline().addLast("packet_handler", clientConnection);
+ 						}
+ 					})

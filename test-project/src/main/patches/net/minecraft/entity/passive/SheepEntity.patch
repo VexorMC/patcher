@@ -1,0 +1,41 @@
+--- SheepEntity.java
++++ SheepEntity.java
+@@ -39,11 +39,11 @@
+ 			return false;
+ 		}
+ 	}, 2, 1);
+ 	private static final Map<DyeColor, float[]> COLORS = Maps.newEnumMap(DyeColor.class);
+ 	private int eatGrassTimer;
+-	private EatGrassGoal eatGrassGoal = new EatGrassGoal(this);
++	private final EatGrassGoal eatGrassGoal = new EatGrassGoal(this);
+ 
+ 	public static float[] getDyedColor(DyeColor dyeColor) {
+ 		return (float[])COLORS.get(dyeColor);
+ 	}
+ 
+@@ -87,11 +87,11 @@
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+ 		super.initDataTracker();
+-		this.dataTracker.track(16, new Byte((byte)0));
++		this.dataTracker.track(16, (byte)0);
+ 	}
+ 
+ 	@Override
+ 	protected void dropLoot(boolean bl, int i) {
+ 		if (!this.isSheared()) {
+@@ -261,11 +261,11 @@
+ 	private DyeColor getChildColor(AnimalEntity animalEntity, AnimalEntity animalEntity2) {
+ 		int i = ((SheepEntity)animalEntity).getColor().getSwappedId();
+ 		int j = ((SheepEntity)animalEntity2).getColor().getSwappedId();
+ 		this.field_5369.getInvStack(0).setDamage(i);
+ 		this.field_5369.getInvStack(1).setDamage(j);
+-		ItemStack itemStack = RecipeDispatcher.getInstance().matches(this.field_5369, ((SheepEntity)animalEntity).world);
++		ItemStack itemStack = RecipeDispatcher.getInstance().matches(this.field_5369, animalEntity.world);
+ 		int k;
+ 		if (itemStack != null && itemStack.getItem() == Items.DYE) {
+ 			k = itemStack.getData();
+ 		} else {
+ 			k = this.world.random.nextBoolean() ? i : j;

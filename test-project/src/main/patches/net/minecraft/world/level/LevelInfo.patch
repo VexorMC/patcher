@@ -1,0 +1,23 @@
+--- LevelInfo.java
++++ LevelInfo.java
+@@ -29,18 +29,16 @@
+ 	public LevelInfo setBonusChest() {
+ 		this.bonusChest = true;
+ 		return this;
+ 	}
+ 
+-	public LevelInfo enableCommands() {
++	public void enableCommands() {
+ 		this.commands = true;
+-		return this;
+ 	}
+ 
+-	public LevelInfo setGeneratorOptions(String string) {
++	public void setGeneratorOptions(String string) {
+ 		this.generatorOptions = string;
+-		return this;
+ 	}
+ 
+ 	public boolean hasBonusChest() {
+ 		return this.bonusChest;
+ 	}

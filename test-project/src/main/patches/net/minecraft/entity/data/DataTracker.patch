@@ -1,0 +1,75 @@
+--- DataTracker.java
++++ DataTracker.java
+@@ -21,18 +21,18 @@
+ 	private final Entity entity;
+ 	private boolean empty = true;
+ 	private static final Map<Class<?>, Integer> trackedEntities = Maps.newHashMap();
+ 	private final Map<Integer, DataTracker.DataEntry> entries = Maps.newHashMap();
+ 	private boolean dirty;
+-	private ReadWriteLock lock = new ReentrantReadWriteLock();
++	private final ReadWriteLock lock = new ReentrantReadWriteLock();
+ 
+ 	public DataTracker(Entity entity) {
+ 		this.entity = entity;
+ 	}
+ 
+ 	public <T> void track(int i, T object) {
+-		Integer integer = (Integer)trackedEntities.get(object.getClass());
++		Integer integer = trackedEntities.get(object.getClass());
+ 		if (integer == null) {
+ 			throw new IllegalArgumentException("Unknown data type: " + object.getClass());
+ 		} else if (i > 31) {
+ 			throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 31 + ")");
+ 		} else if (this.entries.containsKey(i)) {
+@@ -81,11 +81,11 @@
+ 	private DataTracker.DataEntry get(int i) {
+ 		this.lock.readLock().lock();
+ 
+ 		DataTracker.DataEntry dataEntry;
+ 		try {
+-			dataEntry = (DataTracker.DataEntry)this.entries.get(i);
++			dataEntry = this.entries.get(i);
+ 		} catch (Throwable var6) {
+ 			CrashReport crashReport = CrashReport.create(var6, "Getting synched entity data");
+ 			CrashReportSection crashReportSection = crashReport.addElement("Synched entity data");
+ 			crashReportSection.add("Data ID", i);
+ 			throw new CrashException(crashReport);
+@@ -116,11 +116,11 @@
+ 
+ 	public boolean isDirty() {
+ 		return this.dirty;
+ 	}
+ 
+-	public static void writeData(List<DataTracker.DataEntry> list, PacketByteBuf packetByteBuf) throws IOException {
++	public static void writeData(List<DataTracker.DataEntry> list, PacketByteBuf packetByteBuf) {
+ 		if (list != null) {
+ 			for (DataTracker.DataEntry dataEntry : list) {
+ 				writeEntryToPacket(packetByteBuf, dataEntry);
+ 			}
+ 		}
+@@ -176,11 +176,11 @@
+ 
+ 		this.lock.readLock().unlock();
+ 		return list;
+ 	}
+ 
+-	private static void writeEntryToPacket(PacketByteBuf packetByteBuf, DataTracker.DataEntry dataEntry) throws IOException {
++	private static void writeEntryToPacket(PacketByteBuf packetByteBuf, DataTracker.DataEntry dataEntry) {
+ 		int i = (dataEntry.getValueType() << 5 | dataEntry.method_2707() & 31) & 0xFF;
+ 		packetByteBuf.writeByte(i);
+ 		switch (dataEntry.getValueType()) {
+ 			case 0:
+ 				packetByteBuf.writeByte((Byte)dataEntry.getValue());
+@@ -266,11 +266,11 @@
+ 
+ 	public void writeUpdatedEntries(List<DataTracker.DataEntry> list) {
+ 		this.lock.writeLock().lock();
+ 
+ 		for (DataTracker.DataEntry dataEntry : list) {
+-			DataTracker.DataEntry dataEntry2 = (DataTracker.DataEntry)this.entries.get(dataEntry.method_2707());
++			DataTracker.DataEntry dataEntry2 = this.entries.get(dataEntry.method_2707());
+ 			if (dataEntry2 != null) {
+ 				dataEntry2.setValue(dataEntry.getValue());
+ 				this.entity.method_8364(dataEntry.method_2707());
+ 			}
+ 		}

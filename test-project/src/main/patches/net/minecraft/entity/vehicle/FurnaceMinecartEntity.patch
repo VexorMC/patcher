@@ -1,0 +1,59 @@
+--- FurnaceMinecartEntity.java
++++ FurnaceMinecartEntity.java
+@@ -17,27 +17,23 @@
+ public class FurnaceMinecartEntity extends AbstractMinecartEntity {
+ 	private int fuel;
+ 	public double pushX;
+ 	public double pushZ;
+ 
+-	public FurnaceMinecartEntity(World world) {
+-		super(world);
++	public FurnaceMinecartEntity(World world, double x, double y, double z) {
++		super(world, x, y, z);
+ 	}
+ 
+-	public FurnaceMinecartEntity(World world, double d, double e, double f) {
+-		super(world, d, e, f);
+-	}
+-
+ 	@Override
+ 	public AbstractMinecartEntity.Type getMinecartType() {
+ 		return AbstractMinecartEntity.Type.FURNACE;
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+ 		super.initDataTracker();
+-		this.dataTracker.track(16, new Byte((byte)0));
++		this.dataTracker.track(16, (byte) 0);
+ 	}
+ 
+ 	@Override
+ 	public void tick() {
+ 		super.tick();
+@@ -71,11 +67,11 @@
+ 	@Override
+ 	protected void moveOnRail(BlockPos blockPos, BlockState blockState) {
+ 		super.moveOnRail(blockPos, blockState);
+ 		double d = this.pushX * this.pushX + this.pushZ * this.pushZ;
+ 		if (d > 1.0E-4 && this.velocityX * this.velocityX + this.velocityZ * this.velocityZ > 0.001) {
+-			d = (double)MathHelper.sqrt(d);
++			d = MathHelper.sqrt(d);
+ 			this.pushX /= d;
+ 			this.pushZ /= d;
+ 			if (this.pushX * this.velocityX + this.pushZ * this.velocityZ < 0.0) {
+ 				this.pushX = 0.0;
+ 				this.pushZ = 0.0;
+@@ -89,11 +85,11 @@
+ 
+ 	@Override
+ 	protected void applySlowdown() {
+ 		double d = this.pushX * this.pushX + this.pushZ * this.pushZ;
+ 		if (d > 1.0E-4) {
+-			d = (double)MathHelper.sqrt(d);
++			d = MathHelper.sqrt(d);
+ 			this.pushX /= d;
+ 			this.pushZ /= d;
+ 			double e = 1.0;
+ 			this.velocityX *= 0.8F;
+ 			this.velocityY *= 0.0;

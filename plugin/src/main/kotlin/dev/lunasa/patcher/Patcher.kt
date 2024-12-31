@@ -15,10 +15,12 @@ import dev.lunasa.patcher.task.RemapJarTask
 import dev.lunasa.patcher.task.RunClientTask
 import dev.lunasa.patcher.util.NativesTask
 import org.gradle.api.DefaultTask
+import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.AbstractCompile
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.get
 import java.io.File
@@ -75,6 +77,17 @@ class Patcher : Plugin<Project> {
         project.tasks.named("jar", Jar::class.java) {
             finalizedBy(generateDeltaTask)
         }.get()
+
+        project.tasks.withType(JavaCompile::class.java) {
+            sourceCompatibility = JavaVersion.VERSION_17.toString()
+            targetCompatibility = JavaVersion.VERSION_17.toString()
+
+            doFirst {
+                if (source.files.any { it.path.contains("src/minecraft") }) {
+                    options.compilerArgs.addAll(listOf("--release", "8"))
+                }
+            }
+        }
 
         project.afterEvaluate { afterEvaluate(extension) }
     }

@@ -13,7 +13,7 @@ object VineFlowerDecompiler {
                 IFernflowerPreferences.BYTECODE_SOURCE_MAPPING to "1",
                 IFernflowerPreferences.REMOVE_SYNTHETIC to "1",
                 IFernflowerPreferences.LOG_LEVEL to "trace",
-                IFernflowerPreferences.INDENT_STRING to "\t",
+                IFernflowerPreferences.INDENT_STRING to "\t"
             )
 
         val saver = ResultSaver { destination }

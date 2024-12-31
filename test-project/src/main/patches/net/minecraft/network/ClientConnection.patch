@@ -1,0 +1,321 @@
+--- ClientConnection.java
++++ ClientConnection.java
+@@ -44,44 +44,39 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ import org.apache.logging.log4j.Marker;
+ import org.apache.logging.log4j.MarkerManager;
+ 
+-public class ClientConnection extends SimpleChannelInboundHandler<Packet> {
++public class ClientConnection extends SimpleChannelInboundHandler<Packet<?>> {
+ 	private static final Logger LOGGER = LogManager.getLogger();
+ 	public static final Marker MARKER_NETWORK = MarkerManager.getMarker("NETWORK");
+ 	public static final Marker MARKER_NETWORK_PACKETS = MarkerManager.getMarker("NETWORK_PACKETS", MARKER_NETWORK);
+ 	public static final AttributeKey<NetworkState> ATTR_KEY_PROTOCOL = AttributeKey.valueOf("protocol");
+-	public static final Lazy<NioEventLoopGroup> field_11553 = new Lazy<NioEventLoopGroup>() {
+-		protected NioEventLoopGroup create() {
+-			return new NioEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Client IO #%d").setDaemon(true).build());
+-		}
+-	};
+-	public static final Lazy<EpollEventLoopGroup> field_11554 = new Lazy<EpollEventLoopGroup>() {
+-		protected EpollEventLoopGroup create() {
+-			return new EpollEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Epoll Client IO #%d").setDaemon(true).build());
+-		}
+-	};
+-	public static final Lazy<LocalEventLoopGroup> field_11555 = new Lazy<LocalEventLoopGroup>() {
+-		protected LocalEventLoopGroup create() {
+-			return new LocalEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Local Client IO #%d").setDaemon(true).build());
+-		}
+-	};
+-	private final NetworkSide side;
+-	private final Queue<ClientConnection.PacketWrapper> packetQueue = Queues.newConcurrentLinkedQueue();
+-	private final ReentrantReadWriteLock field_11557 = new ReentrantReadWriteLock();
++	public static final Lazy<NioEventLoopGroup> field_11553 = new Lazy<>() {
++        protected NioEventLoopGroup create() {
++            return new NioEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Client IO #%d").setDaemon(true).build());
++        }
++    };
++	public static final Lazy<EpollEventLoopGroup> field_11554 = new Lazy<>() {
++        protected EpollEventLoopGroup create() {
++            return new EpollEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Epoll Client IO #%d").setDaemon(true).build());
++        }
++    };
++	public static final Lazy<LocalEventLoopGroup> field_11555 = new Lazy<>() {
++        protected LocalEventLoopGroup create() {
++            return new LocalEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Local Client IO #%d").setDaemon(true).build());
++        }
++    };
++    private final Queue<ClientConnection.PacketWrapper> packetQueue = Queues.newConcurrentLinkedQueue();
++	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+ 	private Channel channel;
+ 	private SocketAddress address;
+ 	private PacketListener packetListener;
+ 	private Text disconnectReason;
+ 	private boolean encrypted;
+ 	private boolean disconnected;
+ 
+-	public ClientConnection(NetworkSide networkSide) {
+-		this.side = networkSide;
+-	}
+-
+ 	public void channelActive(ChannelHandlerContext channelHandlerContext) throws Exception {
+ 		super.channelActive(channelHandlerContext);
+ 		this.channel = channelHandlerContext.channel();
+ 		this.address = this.channel.remoteAddress();
+ 
+@@ -96,82 +91,85 @@
+ 		this.channel.attr(ATTR_KEY_PROTOCOL).set(networkState);
+ 		this.channel.config().setAutoRead(true);
+ 		LOGGER.debug("Enabled auto read");
+ 	}
+ 
+-	public void channelInactive(ChannelHandlerContext channelHandlerContext) throws Exception {
++	public void channelInactive(ChannelHandlerContext channelHandlerContext) {
+ 		this.disconnect(new TranslatableText("disconnect.endOfStream"));
+ 	}
+ 
+-	public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) throws Exception {
++	public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
+ 		TranslatableText translatableText;
+ 		if (throwable instanceof TimeoutException) {
+ 			translatableText = new TranslatableText("disconnect.timeout");
+ 		} else {
+ 			translatableText = new TranslatableText("disconnect.genericReason", "Internal Exception: " + throwable);
+ 		}
+ 
+ 		this.disconnect(translatableText);
+ 	}
+ 
+-	protected void channelRead0(ChannelHandlerContext channelHandlerContext, Packet packet) throws Exception {
++	@Override
++	@SuppressWarnings("unchecked")
++	protected void channelRead0(ChannelHandlerContext channelHandlerContext, Packet packet) {
+ 		if (this.channel.isOpen()) {
+ 			try {
+ 				packet.apply(this.packetListener);
+-			} catch (OffThreadException var4) {
++			} catch (OffThreadException ignored) {
+ 			}
+ 		}
+ 	}
+ 
+ 	public void setPacketListener(PacketListener packetListener) {
+-		Validate.notNull(packetListener, "packetListener", new Object[0]);
+-		LOGGER.debug("Set listener of {} to {}", new Object[]{this, packetListener});
++		Validate.notNull(packetListener, "packetListener");
++		LOGGER.debug("Set listener of {} to {}", this, packetListener);
+ 		this.packetListener = packetListener;
+ 	}
+ 
+-	public void send(Packet packet) {
++	public void send(Packet<?> packet) {
+ 		if (this.isOpen()) {
+ 			this.sendQueuedPackets();
+ 			this.sendImmediately(packet, null);
+ 		} else {
+-			this.field_11557.writeLock().lock();
++			this.lock.writeLock().lock();
+ 
+ 			try {
+-				this.packetQueue.add(new ClientConnection.PacketWrapper(packet, null));
++				this.packetQueue.add(new ClientConnection.PacketWrapper(packet, (GenericFutureListener<? extends Future<? super Void>>) null));
+ 			} finally {
+-				this.field_11557.writeLock().unlock();
++				this.lock.writeLock().unlock();
+ 			}
+ 		}
+ 	}
+ 
+-	public void send(
+-		Packet packet,
+-		GenericFutureListener<? extends Future<? super Void>> genericFutureListener,
+-		GenericFutureListener<? extends Future<? super Void>>... genericFutureListeners
+-	) {
++	@SafeVarargs
++    public final void send(
++            Packet<?> packet,
++            GenericFutureListener<? extends Future<? super Void>> genericFutureListener,
++            GenericFutureListener<? extends Future<? super Void>>... genericFutureListeners
++    ) {
+ 		if (this.isOpen()) {
+ 			this.sendQueuedPackets();
+-			this.sendImmediately(packet, (GenericFutureListener<? extends Future<? super Void>>[])ArrayUtils.add(genericFutureListeners, 0, genericFutureListener));
++			this.sendImmediately(packet, ArrayUtils.add(genericFutureListeners, 0, genericFutureListener));
+ 		} else {
+-			this.field_11557.writeLock().lock();
++			this.lock.writeLock().lock();
+ 
+ 			try {
+ 				this.packetQueue
+ 					.add(
+ 						new ClientConnection.PacketWrapper(
+-							packet, (GenericFutureListener<? extends Future<? super Void>>[])ArrayUtils.add(genericFutureListeners, 0, genericFutureListener)
++							packet, ArrayUtils.add(genericFutureListeners, 0, genericFutureListener)
+ 						)
+ 					);
+ 			} finally {
+-				this.field_11557.writeLock().unlock();
++				this.lock.writeLock().unlock();
+ 			}
+ 		}
+ 	}
+ 
+-	private void sendImmediately(Packet packet, GenericFutureListener<? extends Future<? super Void>>[] genericFutureListeners) {
++	private void sendImmediately(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>>[] genericFutureListeners) {
+ 		final NetworkState networkState = NetworkState.getPacketHandlerState(packet);
+-		final NetworkState networkState2 = (NetworkState)this.channel.attr(ATTR_KEY_PROTOCOL).get();
++		final NetworkState networkState2 = this.channel.attr(ATTR_KEY_PROTOCOL).get();
+ 		if (networkState2 != networkState) {
+ 			LOGGER.debug("Disabled auto read");
+ 			this.channel.config().setAutoRead(false);
+ 		}
+ 
+@@ -185,38 +183,36 @@
+ 				channelFuture.addListeners(genericFutureListeners);
+ 			}
+ 
+ 			channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+ 		} else {
+-			this.channel.eventLoop().execute(new Runnable() {
+-				public void run() {
+-					if (networkState != networkState2) {
+-						ClientConnection.this.setState(networkState);
+-					}
++			this.channel.eventLoop().execute(() -> {
++                if (networkState != networkState2) {
++                    ClientConnection.this.setState(networkState);
++                }
+ 
+-					ChannelFuture channelFuture = ClientConnection.this.channel.writeAndFlush(packet);
+-					if (genericFutureListeners != null) {
+-						channelFuture.addListeners(genericFutureListeners);
+-					}
++                ChannelFuture channelFuture = ClientConnection.this.channel.writeAndFlush(packet);
++                if (genericFutureListeners != null) {
++                    channelFuture.addListeners(genericFutureListeners);
++                }
+ 
+-					channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+-				}
+-			});
++                channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
++            });
+ 		}
+ 	}
+ 
+ 	private void sendQueuedPackets() {
+ 		if (this.channel != null && this.channel.isOpen()) {
+-			this.field_11557.readLock().lock();
++			this.lock.readLock().lock();
+ 
+ 			try {
+ 				while (!this.packetQueue.isEmpty()) {
+-					ClientConnection.PacketWrapper packetWrapper = (ClientConnection.PacketWrapper)this.packetQueue.poll();
++					ClientConnection.PacketWrapper packetWrapper = this.packetQueue.poll();
+ 					this.sendImmediately(packetWrapper.packet, packetWrapper.field_8444);
+ 				}
+ 			} finally {
+-				this.field_11557.readLock().unlock();
++				this.lock.readLock().unlock();
+ 			}
+ 		}
+ 	}
+ 
+ 	public void tick() {
+@@ -242,53 +238,53 @@
+ 	public boolean isLocal() {
+ 		return this.channel instanceof LocalChannel || this.channel instanceof LocalServerChannel;
+ 	}
+ 
+ 	public static ClientConnection connect(InetAddress inetAddress, int i, boolean bl) {
+-		final ClientConnection clientConnection = new ClientConnection(NetworkSide.CLIENTBOUND);
++		final ClientConnection clientConnection = new ClientConnection();
+ 		Class<? extends SocketChannel> class_;
+ 		Lazy<? extends EventLoopGroup> lazy;
+ 		if (Epoll.isAvailable() && bl) {
+ 			class_ = EpollSocketChannel.class;
+ 			lazy = field_11554;
+ 		} else {
+ 			class_ = NioSocketChannel.class;
+ 			lazy = field_11553;
+ 		}
+ 
+-		((Bootstrap)((Bootstrap)((Bootstrap)new Bootstrap().group(lazy.get()))
++		new Bootstrap().group(lazy.get())
+ 					.handler(
+-						new ChannelInitializer<Channel>() {
+-							protected void initChannel(Channel channel) throws Exception {
+-								try {
+-									channel.config().setOption(ChannelOption.TCP_NODELAY, true);
+-								} catch (ChannelException var3) {
+-								}
++                            new ChannelInitializer<>() {
++                                protected void initChannel(Channel channel) {
++                                    try {
++                                        channel.config().setOption(ChannelOption.TCP_NODELAY, true);
++                                    } catch (ChannelException ignored) {
++                                    }
+ 
+-								channel.pipeline()
+-									.addLast("timeout", new ReadTimeoutHandler(30))
+-									.addLast("splitter", new SplitterHandler())
+-									.addLast("decoder", new DecoderHandler(NetworkSide.CLIENTBOUND))
+-									.addLast("prepender", new SizePrepender())
+-									.addLast("encoder", new PacketEncoder(NetworkSide.SERVERBOUND))
+-									.addLast("packet_handler", clientConnection);
+-							}
+-						}
+-					))
+-				.channel(class_))
++                                    channel.pipeline()
++                                            .addLast("timeout", new ReadTimeoutHandler(30))
++                                            .addLast("splitter", new SplitterHandler())
++                                            .addLast("decoder", new DecoderHandler(NetworkSide.CLIENTBOUND))
++                                            .addLast("prepender", new SizePrepender())
++                                            .addLast("encoder", new PacketEncoder(NetworkSide.SERVERBOUND))
++                                            .addLast("packet_handler", clientConnection);
++                                }
++                            }
++					)
++				.channel(class_)
+ 			.connect(inetAddress, i)
+ 			.syncUninterruptibly();
+ 		return clientConnection;
+ 	}
+ 
+ 	public static ClientConnection connectLocal(SocketAddress socketAddress) {
+-		final ClientConnection clientConnection = new ClientConnection(NetworkSide.CLIENTBOUND);
+-		((Bootstrap)((Bootstrap)((Bootstrap)new Bootstrap().group((EventLoopGroup)field_11555.get())).handler(new ChannelInitializer<Channel>() {
+-			protected void initChannel(Channel channel) throws Exception {
+-				channel.pipeline().addLast("packet_handler", clientConnection);
+-			}
+-		})).channel(LocalChannel.class)).connect(socketAddress).syncUninterruptibly();
++		final ClientConnection clientConnection = new ClientConnection();
++		new Bootstrap().group(field_11555.get()).handler(new ChannelInitializer<>() {
++            protected void initChannel(Channel channel) {
++                channel.pipeline().addLast("packet_handler", clientConnection);
++            }
++        }).channel(LocalChannel.class).connect(socketAddress).syncUninterruptibly();
+ 		return clientConnection;
+ 	}
+ 
+ 	public void setupEncryption(SecretKey secretKey) {
+ 		this.encrypted = true;
+@@ -358,14 +354,15 @@
+ 			}
+ 		}
+ 	}
+ 
+ 	static class PacketWrapper {
+-		private final Packet packet;
++		private final Packet<?> packet;
+ 		private final GenericFutureListener<? extends Future<? super Void>>[] field_8444;
+ 
+-		public PacketWrapper(Packet packet, GenericFutureListener<? extends Future<? super Void>>... genericFutureListeners) {
++		@SafeVarargs
++        public PacketWrapper(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>>... genericFutureListeners) {
+ 			this.packet = packet;
+ 			this.field_8444 = genericFutureListeners;
+ 		}
+ 	}
+ }

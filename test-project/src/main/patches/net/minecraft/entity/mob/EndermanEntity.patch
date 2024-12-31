@@ -1,0 +1,160 @@
+--- EndermanEntity.java
++++ EndermanEntity.java
+@@ -1,14 +1,12 @@
+ package net.minecraft.entity.mob;
+ 
+ import com.google.common.base.Predicate;
+ import com.google.common.collect.Sets;
+-import java.util.Collections;
+-import java.util.List;
+-import java.util.Random;
+-import java.util.Set;
+-import java.util.UUID;
++
++import java.util.*;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockState;
+ import net.minecraft.block.Blocks;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.client.particle.ParticleType;
+@@ -56,15 +54,11 @@
+ 		this.goals.add(8, new LookAroundGoal(this));
+ 		this.goals.add(10, new EndermanEntity.PlaceBlockGoal(this));
+ 		this.goals.add(11, new EndermanEntity.PickUpBlockGoal(this));
+ 		this.attackGoals.add(1, new RevengeGoal(this, false));
+ 		this.attackGoals.add(2, new EndermanEntity.TeleportTowardsPlayerGoal(this));
+-		this.attackGoals.add(3, new FollowTargetGoal(this, EndermiteEntity.class, 10, true, false, new Predicate<EndermiteEntity>() {
+-			public boolean apply(EndermiteEntity endermiteEntity) {
+-				return endermiteEntity.isPlayerSpawned();
+-			}
+-		}));
++		this.attackGoals.add(3, new FollowTargetGoal<>(this, EndermiteEntity.class, 10, true, false, endermiteEntity -> endermiteEntity.isPlayerSpawned()));
+ 	}
+ 
+ 	@Override
+ 	protected void initializeAttributes() {
+ 		super.initializeAttributes();
+@@ -75,13 +69,13 @@
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+ 		super.initDataTracker();
+-		this.dataTracker.track(16, new Short((short)0));
+-		this.dataTracker.track(17, new Byte((byte)0));
+-		this.dataTracker.track(18, new Byte((byte)0));
++		this.dataTracker.track(16, (short) 0);
++		this.dataTracker.track(17, (byte) 0);
++		this.dataTracker.track(18, (byte) 0);
+ 	}
+ 
+ 	@Override
+ 	public void writeCustomDataToNbt(NbtCompound nbtCompound) {
+ 		super.writeCustomDataToNbt(nbtCompound);
+@@ -93,11 +87,11 @@
+ 	@Override
+ 	public void readCustomDataFromNbt(NbtCompound nbtCompound) {
+ 		super.readCustomDataFromNbt(nbtCompound);
+ 		BlockState blockState;
+ 		if (nbtCompound.contains("carried", 8)) {
+-			blockState = Block.get(nbtCompound.getString("carried")).stateFromData(nbtCompound.getShort("carriedData") & '\uffff');
++			blockState = Objects.requireNonNull(Block.get(nbtCompound.getString("carried"))).stateFromData(nbtCompound.getShort("carriedData") & '\uffff');
+ 		} else {
+ 			blockState = Block.getById(nbtCompound.getShort("carried")).stateFromData(nbtCompound.getShort("carriedData") & '\uffff');
+ 		}
+ 
+ 		this.setCarriedBlock(blockState);
+@@ -115,11 +109,11 @@
+ 				this.z - playerEntity.z
+ 			);
+ 			double d = vec3d2.length();
+ 			vec3d2 = vec3d2.normalize();
+ 			double e = vec3d.dotProduct(vec3d2);
+-			return e > 1.0 - 0.025 / d ? playerEntity.canSee(this) : false;
++			return e > 1.0 - 0.025 / d && playerEntity.canSee(this);
+ 		}
+ 	}
+ 
+ 	@Override
+ 	public float getEyeHeight() {
+@@ -232,11 +226,11 @@
+ 				float n = (this.random.nextFloat() - 0.5F) * 0.2F;
+ 				float o = (this.random.nextFloat() - 0.5F) * 0.2F;
+ 				double p = g + (this.x - g) * l + (this.random.nextDouble() - 0.5) * (double)this.width * 2.0;
+ 				double q = h + (this.y - h) * l + this.random.nextDouble() * (double)this.height;
+ 				double r = i + (this.z - i) * l + (this.random.nextDouble() - 0.5) * (double)this.width * 2.0;
+-				this.world.addParticle(ParticleType.NETHER_PORTAL, p, q, r, (double)m, (double)n, (double)o);
++				this.world.addParticle(ParticleType.NETHER_PORTAL, p, q, r, m, n, o);
+ 			}
+ 
+ 			this.world.playSound(g, h, i, "mob.endermen.portal", 1.0F, 1.0F);
+ 			this.playSound("mob.endermen.portal", 1.0F, 1.0F);
+ 			return true;
+@@ -358,11 +352,11 @@
+ 		@Override
+ 		public boolean canStart() {
+ 			if (!this.enderman.world.getGameRules().getBoolean("mobGriefing")) {
+ 				return false;
+ 			} else {
+-				return this.enderman.getCarriedBlock().getBlock().getMaterial() != Material.AIR ? false : this.enderman.getRandom().nextInt(20) == 0;
++				return this.enderman.getCarriedBlock().getBlock().getMaterial() == Material.AIR && this.enderman.getRandom().nextInt(20) == 0;
+ 			}
+ 		}
+ 
+ 		@Override
+ 		public void tick() {
+@@ -391,11 +385,11 @@
+ 		@Override
+ 		public boolean canStart() {
+ 			if (!this.entity.world.getGameRules().getBoolean("mobGriefing")) {
+ 				return false;
+ 			} else {
+-				return this.entity.getCarriedBlock().getBlock().getMaterial() == Material.AIR ? false : this.entity.getRandom().nextInt(2000) == 0;
++				return this.entity.getCarriedBlock().getBlock().getMaterial() != Material.AIR && this.entity.getRandom().nextInt(2000) == 0;
+ 			}
+ 		}
+ 
+ 		@Override
+ 		public void tick() {
+@@ -417,35 +411,36 @@
+ 			if (!block.canBePlacedAtPos(world, blockPos)) {
+ 				return false;
+ 			} else if (block2.getMaterial() != Material.AIR) {
+ 				return false;
+ 			} else {
+-				return block3.getMaterial() == Material.AIR ? false : block3.renderAsNormalBlock();
++				return block3.getMaterial() != Material.AIR && block3.renderAsNormalBlock();
+ 			}
+ 		}
+ 	}
+ 
++	@SuppressWarnings("unchecked")
+ 	static class TeleportTowardsPlayerGoal extends FollowTargetGoal {
+ 		private PlayerEntity targetPlayer;
+ 		private int lookAtPlayerWarmup;
+ 		private int ticksSinceUnseenTeleport;
+-		private EndermanEntity enderman;
++		private final EndermanEntity enderman;
+ 
+ 		public TeleportTowardsPlayerGoal(EndermanEntity endermanEntity) {
+ 			super(endermanEntity, PlayerEntity.class, true);
+ 			this.enderman = endermanEntity;
+ 		}
+ 
+ 		@Override
+ 		public boolean canStart() {
+ 			double d = this.getFollowRange();
+ 			List<PlayerEntity> list = this.mob.world.getEntitiesInBox(PlayerEntity.class, this.mob.getBoundingBox().expand(d, 4.0, d), this.targetPredicate);
+-			Collections.sort(list, this.field_3629);
++			list.sort(this.field_3629);
+ 			if (list.isEmpty()) {
+ 				return false;
+ 			} else {
+-				this.targetPlayer = (PlayerEntity)list.get(0);
++				this.targetPlayer = list.get(0);
+ 				return true;
+ 			}
+ 		}
+ 
+ 		@Override

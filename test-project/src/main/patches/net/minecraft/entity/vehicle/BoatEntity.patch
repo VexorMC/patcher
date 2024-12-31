@@ -1,0 +1,19 @@
+--- BoatEntity.java
++++ BoatEntity.java
+@@ -42,13 +42,13 @@
+ 		return false;
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+-		this.dataTracker.track(17, new Integer(0));
+-		this.dataTracker.track(18, new Integer(1));
+-		this.dataTracker.track(19, new Float(0.0F));
++		this.dataTracker.track(17, 0);
++		this.dataTracker.track(18, 1);
++		this.dataTracker.track(19, 0.0F);
+ 	}
+ 
+ 	@Override
+ 	public Box getHardCollisionBox(Entity entity) {
+ 		return entity.getBoundingBox();

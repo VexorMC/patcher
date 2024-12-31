@@ -1,0 +1,29 @@
+--- ServerConfigList.java
++++ ServerConfigList.java
+@@ -29,25 +29,12 @@
+ 	protected static final Logger LOGGER = LogManager.getLogger();
+ 	protected final Gson GSON;
+ 	private final File file;
+ 	private final Map<String, V> map = Maps.newHashMap();
+ 	private boolean enabled = true;
+-	private static final ParameterizedType field_9019 = new ParameterizedType() {
+-		public Type[] getActualTypeArguments() {
+-			return new Type[]{ServerConfigEntry.class};
+-		}
+ 
+-		public Type getRawType() {
+-			return List.class;
+-		}
+-
+-		public Type getOwnerType() {
+-			return null;
+-		}
+-	};
+-
+-	public ServerConfigList(File file) {
++    public ServerConfigList(File file) {
+ 		this.file = file;
+ 		GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
+ 		gsonBuilder.registerTypeHierarchyAdapter(ServerConfigEntry.class, new ServerConfigList.DeSerializer());
+ 		this.GSON = gsonBuilder.create();
+ 	}

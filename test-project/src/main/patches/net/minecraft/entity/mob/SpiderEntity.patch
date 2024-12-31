@@ -1,0 +1,87 @@
+--- SpiderEntity.java
++++ SpiderEntity.java
+@@ -28,37 +28,41 @@
+ import net.minecraft.world.World;
+ 
+ public class SpiderEntity extends HostileEntity {
+ 	public SpiderEntity(World world) {
+ 		super(world);
++
+ 		this.setBounds(1.4F, 0.9F);
++
+ 		this.goals.add(1, new SwimGoal(this));
+ 		this.goals.add(3, new PounceAtTargetGoal(this, 0.4F));
+-		this.goals.add(4, new SpiderEntity.AttackGoal(this, PlayerEntity.class));
+-		this.goals.add(4, new SpiderEntity.AttackGoal(this, IronGolemEntity.class));
+ 		this.goals.add(5, new WanderAroundGoal(this, 0.8));
+ 		this.goals.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
+ 		this.goals.add(6, new LookAroundGoal(this));
++
++		this.goals.add(4, new SpiderEntity.AttackGoal(this, PlayerEntity.class));
++		this.goals.add(4, new SpiderEntity.AttackGoal(this, IronGolemEntity.class));
++
+ 		this.attackGoals.add(1, new RevengeGoal(this, false));
+-		this.attackGoals.add(2, new SpiderEntity.FollowTargetGoal(this, PlayerEntity.class));
+-		this.attackGoals.add(3, new SpiderEntity.FollowTargetGoal(this, IronGolemEntity.class));
++		this.attackGoals.add(2, new SpiderEntity.FollowTargetGoal<>(this, PlayerEntity.class));
++		this.attackGoals.add(3, new SpiderEntity.FollowTargetGoal<>(this, IronGolemEntity.class));
+ 	}
+ 
+ 	@Override
+ 	public double getMountedHeightOffset() {
+-		return (double)(this.height * 0.5F);
++		return this.height * 0.5F;
+ 	}
+ 
+ 	@Override
+ 	protected EntityNavigation createNavigation(World world) {
+ 		return new SpiderNavigation(this, world);
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+ 		super.initDataTracker();
+-		this.dataTracker.track(16, new Byte((byte)0));
++		this.dataTracker.track(16, (byte) 0);
+ 	}
+ 
+ 	@Override
+ 	public void tick() {
+ 		super.tick();
+@@ -121,11 +125,11 @@
+ 		return EntityGroup.ARTHROPOD;
+ 	}
+ 
+ 	@Override
+ 	public boolean method_2658(StatusEffectInstance statusEffectInstance) {
+-		return statusEffectInstance.getEffectId() == StatusEffect.POISON.id ? false : super.method_2658(statusEffectInstance);
++		return statusEffectInstance.getEffectId() != StatusEffect.POISON.id && super.method_2658(statusEffectInstance);
+ 	}
+ 
+ 	public boolean getCanClimb() {
+ 		return (this.dataTracker.getByte(16) & 1) != 0;
+ 	}
+@@ -190,11 +194,11 @@
+ 			}
+ 		}
+ 
+ 		@Override
+ 		protected double getSquaredMaxAttackDistance(LivingEntity livingEntity) {
+-			return (double)(4.0F + livingEntity.width);
++			return 4.0F + livingEntity.width;
+ 		}
+ 	}
+ 
+ 	public static class Data implements EntityData {
+ 		public int effect;
+@@ -219,9 +223,9 @@
+ 		}
+ 
+ 		@Override
+ 		public boolean canStart() {
+ 			float f = this.mob.getBrightnessAtEyes(1.0F);
+-			return f >= 0.5F ? false : super.canStart();
++			return !(f >= 0.5F) && super.canStart();
+ 		}
+ 	}
+ }
