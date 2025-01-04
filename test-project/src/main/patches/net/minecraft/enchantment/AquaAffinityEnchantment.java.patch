@@ -1,0 +1,14 @@
+--- AquaAffinityEnchantment.java
++++ AquaAffinityEnchantment.java
+@@ -15,11 +15,6 @@
+ 
+ 	@Override
+ 	public int getMaximumPower(int i) {
+ 		return this.getMinimumPower(i) + 40;
+ 	}
+-
+-	@Override
+-	public int getMaximumLevel() {
+-		return 1;
+-	}
+ }

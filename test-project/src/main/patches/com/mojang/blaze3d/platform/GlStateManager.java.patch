@@ -1,0 +1,50 @@
+--- GlStateManager.java
++++ GlStateManager.java
+@@ -2,30 +2,30 @@
+ 
+ import java.nio.FloatBuffer;
+ import org.lwjgl.opengl.GL11;
+ 
+ public class GlStateManager {
+-	private static GlStateManager.AlphaTestState ALPHA_TEST = new GlStateManager.AlphaTestState();
+-	private static GlStateManager.BooleanState LIGHTING = new GlStateManager.BooleanState(2896);
+-	private static GlStateManager.BooleanState[] LIGHTING_STATES = new GlStateManager.BooleanState[8];
+-	private static GlStateManager.ColorMaterialState COLOR_MATERIAL = new GlStateManager.ColorMaterialState();
+-	private static GlStateManager.BlendFuncState BLEND = new GlStateManager.BlendFuncState();
+-	private static GlStateManager.DepthTestState DEPTH = new GlStateManager.DepthTestState();
+-	private static GlStateManager.FogState FOG = new GlStateManager.FogState();
+-	private static GlStateManager.CullFaceState CULL = new GlStateManager.CullFaceState();
+-	private static GlStateManager.PolygonOffsetState POLY_OFFSET = new GlStateManager.PolygonOffsetState();
+-	private static GlStateManager.LogicOpState COLOR_LOGIC = new GlStateManager.LogicOpState();
+-	private static GlStateManager.TexGenState TEX_GEN = new GlStateManager.TexGenState();
+-	private static GlStateManager.ClearState CLEAR = new GlStateManager.ClearState();
++	private static final GlStateManager.AlphaTestState ALPHA_TEST = new GlStateManager.AlphaTestState();
++	private static final GlStateManager.BooleanState LIGHTING = new GlStateManager.BooleanState(2896);
++	private static final GlStateManager.BooleanState[] LIGHTING_STATES = new GlStateManager.BooleanState[8];
++	private static final GlStateManager.ColorMaterialState COLOR_MATERIAL = new GlStateManager.ColorMaterialState();
++	private static final GlStateManager.BlendFuncState BLEND = new GlStateManager.BlendFuncState();
++	private static final GlStateManager.DepthTestState DEPTH = new GlStateManager.DepthTestState();
++	private static final GlStateManager.FogState FOG = new GlStateManager.FogState();
++	private static final GlStateManager.CullFaceState CULL = new GlStateManager.CullFaceState();
++	private static final GlStateManager.PolygonOffsetState POLY_OFFSET = new GlStateManager.PolygonOffsetState();
++	private static final GlStateManager.LogicOpState COLOR_LOGIC = new GlStateManager.LogicOpState();
++	private static final GlStateManager.TexGenState TEX_GEN = new GlStateManager.TexGenState();
++	private static final GlStateManager.ClearState CLEAR = new GlStateManager.ClearState();
+ 	private static GlStateManager.StencilState STENCIL = new GlStateManager.StencilState();
+-	private static GlStateManager.BooleanState NORMALIZE = new GlStateManager.BooleanState(2977);
++	private static final GlStateManager.BooleanState NORMALIZE = new GlStateManager.BooleanState(2977);
+ 	private static int activeTexture = 0;
+-	private static GlStateManager.Texture2DState[] TEXTURES = new GlStateManager.Texture2DState[8];
++	private static final GlStateManager.Texture2DState[] TEXTURES = new GlStateManager.Texture2DState[8];
+ 	private static int modelShadeMode = 7425;
+-	private static GlStateManager.BooleanState RESCALE_NORMAL = new GlStateManager.BooleanState(32826);
+-	private static GlStateManager.ColorMask COLOR_MASK = new GlStateManager.ColorMask();
+-	private static GlStateManager.Color4 COLOR = new GlStateManager.Color4();
++	private static final GlStateManager.BooleanState RESCALE_NORMAL = new GlStateManager.BooleanState(32826);
++	private static final GlStateManager.ColorMask COLOR_MASK = new GlStateManager.ColorMask();
++	private static final GlStateManager.Color4 COLOR = new GlStateManager.Color4();
+ 
+ 	public static void pushLightingAttributes() {
+ 		GL11.glPushAttrib(8256);
+ 	}
+ 

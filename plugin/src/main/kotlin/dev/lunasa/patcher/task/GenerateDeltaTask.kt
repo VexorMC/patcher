@@ -29,7 +29,7 @@ abstract class GenerateDeltaTask : DefaultTask() {
     fun generateDeltas() {
         val delta = Delta()
         var counter = 0
-        val patchEntries = mutableListOf<ByteArray>()
+        val patchEntries = mutableListOf<Pair<String, ByteArray>>()
 
         val originalZip = JarFile(originalJar.get())
         val modifiedZip = JarFile(modifiedJar.get())
@@ -48,19 +48,21 @@ abstract class GenerateDeltaTask : DefaultTask() {
                 if (!cleanBytes.contentEquals(modifiedBytes)) {
                     val deltaBytes = delta.compute(cleanBytes, modifiedBytes)
 
-                    val className = modifiedEntry.name.replace("/", ".").removeSuffix(".class")
+                    if (!deltaBytes.contentEquals(cleanBytes)) {
+                        val className = modifiedEntry.name.replace("/", ".").removeSuffix(".class")
 
-                    val output: ByteArrayDataOutput = ByteStreams.newDataOutput()
+                        val output: ByteArrayDataOutput = ByteStreams.newDataOutput()
 
-                    output.writeUTF(className)           // Class name
-                    output.writeUTF(originalEntry.name)  // Clean class name
-                    output.writeUTF(modifiedEntry.name)  // Modified class name
+                        output.writeUTF(className)           // Class name
+                        output.writeUTF(originalEntry.name)  // Clean class name
+                        output.writeUTF(modifiedEntry.name)  // Modified class name
 
-                    output.writeInt(deltaBytes.size)
-                    output.write(deltaBytes)
+                        output.writeInt(deltaBytes.size)
+                        output.write(deltaBytes)
 
-                    patchEntries.add(output.toByteArray())
-                    counter++
+                        patchEntries.add(className to output.toByteArray())
+                        counter++
+                    }
                 }
             } else {
                 val modifiedInputStream = modifiedZip.getInputStream(modifiedEntry)
@@ -77,9 +79,9 @@ abstract class GenerateDeltaTask : DefaultTask() {
 
             val patchZipStream = ZipOutputStream(outputStream)
             patchEntries.forEach { patchData ->
-                val patchEntry = ZipEntry("patch_${counter++}.bin")
+                val patchEntry = ZipEntry("patch_${patchData.first}.bin")
                 patchZipStream.putNextEntry(patchEntry)
-                patchZipStream.write(patchData)
+                patchZipStream.write(patchData.second)
                 patchZipStream.closeEntry()
             }
 

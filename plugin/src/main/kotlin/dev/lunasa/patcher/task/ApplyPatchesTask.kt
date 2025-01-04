@@ -30,7 +30,7 @@ abstract class ApplyPatchesTask : DefaultTask() {
 
         patchesDir.walk().forEach { patchFile ->
             if (patchFile.isFile) {
-                val relativePath = patchesDir.toPath().relativize(File(patchFile.parentFile, "${patchFile.nameWithoutExtension}.java").toPath())
+                val relativePath = patchesDir.toPath().relativize(File(patchFile.parentFile, patchFile.name.replace(".patch", "")).toPath())
                 val targetFilePath = File(targetDir, relativePath.toString())
 
                 targetFilePath.parentFile.mkdirs()

@@ -34,7 +34,7 @@ abstract class GeneratePatchesTask : DefaultTask() {
 
         originalDir.walk().forEach { originalFile ->
             if (originalFile.isFile) {
-                val relativePath = originalDir.toPath().relativize(File(originalFile.parentFile, "${originalFile.nameWithoutExtension}.patch").toPath())
+                val relativePath = originalDir.toPath().relativize(File(originalFile.parentFile, "${originalFile.name}.patch").toPath())
                 val modifiedRel = originalDir.toPath().relativize(originalFile.toPath())
                 val modifiedFilePath = File(modifiedDir, modifiedRel.toString())
 
