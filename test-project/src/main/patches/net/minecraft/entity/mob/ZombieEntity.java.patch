@@ -1,0 +1,124 @@
+--- ZombieEntity.java
++++ ZombieEntity.java
+@@ -70,13 +70,13 @@
+ 	protected void initCustomGoals() {
+ 		this.goals.add(4, new MeleeAttackGoal(this, VillagerEntity.class, 1.0, true));
+ 		this.goals.add(4, new MeleeAttackGoal(this, IronGolemEntity.class, 1.0, true));
+ 		this.goals.add(6, new MoveThroughVillageGoal(this, 1.0, false));
+ 		this.attackGoals.add(1, new RevengeGoal(this, true, ZombiePigmanEntity.class));
+-		this.attackGoals.add(2, new FollowTargetGoal(this, PlayerEntity.class, true));
+-		this.attackGoals.add(2, new FollowTargetGoal(this, VillagerEntity.class, false));
+-		this.attackGoals.add(2, new FollowTargetGoal(this, IronGolemEntity.class, true));
++		this.attackGoals.add(2, new FollowTargetGoal<>(this, PlayerEntity.class, true));
++		this.attackGoals.add(2, new FollowTargetGoal<>(this, VillagerEntity.class, false));
++		this.attackGoals.add(2, new FollowTargetGoal<>(this, IronGolemEntity.class, true));
+ 	}
+ 
+ 	@Override
+ 	protected void initializeAttributes() {
+ 		super.initializeAttributes();
+@@ -206,12 +206,12 @@
+ 				for (int l = 0; l < 50; l++) {
+ 					int m = i + MathHelper.nextInt(this.random, 7, 40) * MathHelper.nextInt(this.random, -1, 1);
+ 					int n = j + MathHelper.nextInt(this.random, 7, 40) * MathHelper.nextInt(this.random, -1, 1);
+ 					int o = k + MathHelper.nextInt(this.random, 7, 40) * MathHelper.nextInt(this.random, -1, 1);
+ 					if (World.isOpaque(this.world, new BlockPos(m, n - 1, o)) && this.world.getLightLevelWithNeighbours(new BlockPos(m, n, o)) < 10) {
+-						zombieEntity.updatePosition((double)m, (double)n, (double)o);
+-						if (!this.world.isPlayerInRange((double)m, (double)n, (double)o, 7.0)
++						zombieEntity.updatePosition(m, n, o);
++						if (!this.world.isPlayerInRange(m, n, o, 7.0)
+ 							&& this.world.hasEntityIn(zombieEntity.getBoundingBox(), zombieEntity)
+ 							&& this.world.doesBoxCollide(zombieEntity, zombieEntity.getBoundingBox()).isEmpty()
+ 							&& !this.world.containsFluid(zombieEntity.getBoundingBox())) {
+ 							this.world.spawnEntity(zombieEntity);
+ 							zombieEntity.setTarget(livingEntity);
+@@ -347,17 +347,16 @@
+ 	}
+ 
+ 	@Override
+ 	public void onKilledOther(LivingEntity livingEntity) {
+ 		super.onKilledOther(livingEntity);
+-		if ((this.world.getGlobalDifficulty() == Difficulty.NORMAL || this.world.getGlobalDifficulty() == Difficulty.HARD) && livingEntity instanceof VillagerEntity) {
++		if ((this.world.getGlobalDifficulty() == Difficulty.NORMAL || this.world.getGlobalDifficulty() == Difficulty.HARD) && livingEntity instanceof VillagerEntity mobEntity) {
+ 			if (this.world.getGlobalDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
+ 				return;
+ 			}
+ 
+-			MobEntity mobEntity = (MobEntity)livingEntity;
+-			ZombieEntity zombieEntity = new ZombieEntity(this.world);
++            ZombieEntity zombieEntity = new ZombieEntity(this.world);
+ 			zombieEntity.copyPosition(livingEntity);
+ 			this.world.removeEntity(livingEntity);
+ 			zombieEntity.initialize(this.world.getLocalDifficulty(new BlockPos(zombieEntity)), null);
+ 			zombieEntity.setVillager(true);
+ 			if (livingEntity.isBaby()) {
+@@ -385,34 +384,33 @@
+ 		return f;
+ 	}
+ 
+ 	@Override
+ 	protected boolean canPickupItem(ItemStack itemStack) {
+-		return itemStack.getItem() == Items.EGG && this.isBaby() && this.hasVehicle() ? false : super.canPickupItem(itemStack);
++		return (itemStack.getItem() != Items.EGG || !this.isBaby() || !this.hasVehicle()) && super.canPickupItem(itemStack);
+ 	}
+ 
+ 	@Override
+ 	public EntityData initialize(LocalDifficulty localDifficulty, EntityData entityData) {
+ 		entityData = super.initialize(localDifficulty, entityData);
+ 		float f = localDifficulty.getClampedLocalDifficulty();
+ 		this.setCanPickUpLoot(this.random.nextFloat() < 0.55F * f);
+ 		if (entityData == null) {
+-			entityData = new ZombieEntity.Data(this.world.random.nextFloat() < 0.05F, this.world.random.nextFloat() < 0.05F);
++			entityData = new Data(this.world.random.nextFloat() < 0.05F, this.world.random.nextFloat() < 0.05F);
+ 		}
+ 
+-		if (entityData instanceof ZombieEntity.Data) {
+-			ZombieEntity.Data data = (ZombieEntity.Data)entityData;
+-			if (data.field_6929) {
++		if (entityData instanceof Data data) {
++            if (data.field_6929) {
+ 				this.setVillager(true);
+ 			}
+ 
+ 			if (data.field_6928) {
+ 				this.setBaby(true);
+ 				if ((double)this.world.random.nextFloat() < 0.05) {
+ 					List<ChickenEntity> list = this.world.getEntitiesInBox(ChickenEntity.class, this.getBoundingBox().expand(5.0, 3.0, 5.0), EntityPredicate.NOT_MOUNTED);
+ 					if (!list.isEmpty()) {
+-						ChickenEntity chickenEntity = (ChickenEntity)list.get(0);
++						ChickenEntity chickenEntity = list.get(0);
+ 						chickenEntity.setHasJockey(true);
+ 						this.startRiding(chickenEntity);
+ 					}
+ 				} else if ((double)this.world.random.nextFloat() < 0.05) {
+ 					ChickenEntity chickenEntity2 = new ChickenEntity(this.world);
+@@ -428,11 +426,11 @@
+ 		this.setCanBreakDoors(this.random.nextFloat() < f * 0.1F);
+ 		this.initEquipment(localDifficulty);
+ 		this.updateEnchantments(localDifficulty);
+ 		if (this.getMainSlot(4) == null) {
+ 			Calendar calendar = this.world.getCalenderInstance();
+-			if (calendar.get(2) + 1 == 10 && calendar.get(5) == 31 && this.random.nextFloat() < 0.25F) {
++			if (calendar.get(Calendar.MONTH) + 1 == 10 && calendar.get(Calendar.DATE) == 31 && this.random.nextFloat() < 0.25F) {
+ 				this.setArmorSlot(4, new ItemStack(this.random.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.PUMPKIN));
+ 				this.armorDropChances[4] = 0.0F;
+ 			}
+ 		}
+ 
+@@ -587,13 +585,13 @@
+ 			((CreeperEntity)damageSource.getAttacker()).onHeadDropped();
+ 			this.dropItem(new ItemStack(Items.SKULL, 1, 2), 0.0F);
+ 		}
+ 	}
+ 
+-	class Data implements EntityData {
+-		public boolean field_6928 = false;
+-		public boolean field_6929 = false;
++	static class Data implements EntityData {
++		public boolean field_6928;
++		public boolean field_6929;
+ 
+ 		private Data(boolean bl, boolean bl2) {
+ 			this.field_6928 = bl;
+ 			this.field_6929 = bl2;
+ 		}

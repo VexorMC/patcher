@@ -1,0 +1,86 @@
+--- SkeletonEntity.java
++++ SkeletonEntity.java
+@@ -39,25 +39,25 @@
+ import net.minecraft.world.LocalDifficulty;
+ import net.minecraft.world.World;
+ import net.minecraft.world.dimension.TheNetherDimension;
+ 
+ public class SkeletonEntity extends HostileEntity implements RangedAttackMob {
+-	private ProjectileAttackGoal projectileAttackGoal = new ProjectileAttackGoal(this, 1.0, 20, 60, 15.0F);
+-	private MeleeAttackGoal meleeAttackGoal = new MeleeAttackGoal(this, PlayerEntity.class, 1.2, false);
++	private final ProjectileAttackGoal projectileAttackGoal = new ProjectileAttackGoal(this, 1.0, 20, 60, 15.0F);
++	private final MeleeAttackGoal meleeAttackGoal = new MeleeAttackGoal(this, PlayerEntity.class, 1.2, false);
+ 
+ 	public SkeletonEntity(World world) {
+ 		super(world);
+ 		this.goals.add(1, new SwimGoal(this));
+ 		this.goals.add(2, new AvoidSunlightGoal(this));
+ 		this.goals.add(3, new EscapeSunlightGoal(this, 1.0));
+-		this.goals.add(3, new FleeEntityGoal(this, WolfEntity.class, 6.0F, 1.0, 1.2));
++		this.goals.add(3, new FleeEntityGoal<>(this, WolfEntity.class, 6.0F, 1.0, 1.2));
+ 		this.goals.add(4, new WanderAroundGoal(this, 1.0));
+ 		this.goals.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
+ 		this.goals.add(6, new LookAroundGoal(this));
+ 		this.attackGoals.add(1, new RevengeGoal(this, false));
+-		this.attackGoals.add(2, new FollowTargetGoal(this, PlayerEntity.class, true));
+-		this.attackGoals.add(3, new FollowTargetGoal(this, IronGolemEntity.class, true));
++		this.attackGoals.add(2, new FollowTargetGoal<>(this, PlayerEntity.class, true));
++		this.attackGoals.add(3, new FollowTargetGoal<>(this, IronGolemEntity.class, true));
+ 		if (world != null && !world.isClient) {
+ 			this.updateAttackType();
+ 		}
+ 	}
+ 
+@@ -68,11 +68,11 @@
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+ 		super.initDataTracker();
+-		this.dataTracker.track(13, new Byte((byte)0));
++		this.dataTracker.track(13, (byte)0);
+ 	}
+ 
+ 	@Override
+ 	protected String getAmbientSound() {
+ 		return "mob.skeleton.say";
+@@ -145,22 +145,20 @@
+ 	}
+ 
+ 	@Override
+ 	public void tickRiding() {
+ 		super.tickRiding();
+-		if (this.vehicle instanceof PathAwareEntity) {
+-			PathAwareEntity pathAwareEntity = (PathAwareEntity)this.vehicle;
+-			this.bodyYaw = pathAwareEntity.bodyYaw;
++		if (this.vehicle instanceof PathAwareEntity pathAwareEntity) {
++            this.bodyYaw = pathAwareEntity.bodyYaw;
+ 		}
+ 	}
+ 
+ 	@Override
+ 	public void onKilled(DamageSource damageSource) {
+ 		super.onKilled(damageSource);
+-		if (damageSource.getSource() instanceof AbstractArrowEntity && damageSource.getAttacker() instanceof PlayerEntity) {
+-			PlayerEntity playerEntity = (PlayerEntity)damageSource.getAttacker();
+-			double d = playerEntity.x - this.x;
++		if (damageSource.getSource() instanceof AbstractArrowEntity && damageSource.getAttacker() instanceof PlayerEntity playerEntity) {
++            double d = playerEntity.x - this.x;
+ 			double e = playerEntity.z - this.z;
+ 			if (d * d + e * e >= 2500.0) {
+ 				playerEntity.incrementStat(AchievementsAndCriterions.SNIPE_SKELETON);
+ 			}
+ 		} else if (damageSource.getAttacker() instanceof CreeperEntity
+@@ -227,11 +225,11 @@
+ 		}
+ 
+ 		this.setCanPickUpLoot(this.random.nextFloat() < 0.55F * localDifficulty.getClampedLocalDifficulty());
+ 		if (this.getMainSlot(4) == null) {
+ 			Calendar calendar = this.world.getCalenderInstance();
+-			if (calendar.get(2) + 1 == 10 && calendar.get(5) == 31 && this.random.nextFloat() < 0.25F) {
++			if (calendar.get(Calendar.MONTH) + 1 == 10 && calendar.get(Calendar.DATE) == 31 && this.random.nextFloat() < 0.25F) {
+ 				this.setArmorSlot(4, new ItemStack(this.random.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.PUMPKIN));
+ 				this.armorDropChances[4] = 0.0F;
+ 			}
+ 		}
+ 

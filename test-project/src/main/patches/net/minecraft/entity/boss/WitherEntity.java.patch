@@ -1,0 +1,94 @@
+--- WitherEntity.java
++++ WitherEntity.java
+@@ -36,16 +36,16 @@
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.world.Difficulty;
+ import net.minecraft.world.World;
+ 
+ public class WitherEntity extends HostileEntity implements BossBarProvider, RangedAttackMob {
+-	private float[] sideHeadPitches = new float[2];
+-	private float[] sideHeadYaws = new float[2];
+-	private float[] prevSideHeadPitches = new float[2];
+-	private float[] prevSideHeadYaws = new float[2];
+-	private int[] field_5376 = new int[2];
+-	private int[] field_5377 = new int[2];
++	private final float[] sideHeadPitches = new float[2];
++	private final float[] sideHeadYaws = new float[2];
++	private final float[] prevSideHeadPitches = new float[2];
++	private final float[] prevSideHeadYaws = new float[2];
++	private final int[] field_5376 = new int[2];
++	private final int[] field_5377 = new int[2];
+ 	private int field_5378;
+ 	private static final Predicate<Entity> CAN_ATTACK_PREDICATE = new Predicate<Entity>() {
+ 		public boolean apply(Entity entity) {
+ 			return entity instanceof LivingEntity && ((LivingEntity)entity).getGroup() != EntityGroup.UNDEAD;
+ 		}
+@@ -61,21 +61,21 @@
+ 		this.goals.add(2, new ProjectileAttackGoal(this, 1.0, 40, 20.0F));
+ 		this.goals.add(5, new WanderAroundGoal(this, 1.0));
+ 		this.goals.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
+ 		this.goals.add(7, new LookAroundGoal(this));
+ 		this.attackGoals.add(1, new RevengeGoal(this, false));
+-		this.attackGoals.add(2, new FollowTargetGoal(this, MobEntity.class, 0, false, false, CAN_ATTACK_PREDICATE));
++		this.attackGoals.add(2, new FollowTargetGoal<>(this, MobEntity.class, 0, false, false, CAN_ATTACK_PREDICATE));
+ 		this.experiencePoints = 50;
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+ 		super.initDataTracker();
+-		this.dataTracker.track(17, new Integer(0));
+-		this.dataTracker.track(18, new Integer(0));
+-		this.dataTracker.track(19, new Integer(0));
+-		this.dataTracker.track(20, new Integer(0));
++		this.dataTracker.track(17, 0);
++		this.dataTracker.track(18, 0);
++		this.dataTracker.track(19, 0);
++		this.dataTracker.track(20, 0);
+ 	}
+ 
+ 	@Override
+ 	public void writeCustomDataToNbt(NbtCompound nbtCompound) {
+ 		super.writeCustomDataToNbt(nbtCompound);
+@@ -151,11 +151,11 @@
+ 				double f = this.getHeadY(i + 1);
+ 				double g = this.getHeadZ(i + 1);
+ 				double h = entity2.x - e;
+ 				double k = entity2.y + (double)entity2.getEyeHeight() - f;
+ 				double l = entity2.z - g;
+-				double m = (double)MathHelper.sqrt(h * h + l * l);
++				double m = MathHelper.sqrt(h * h + l * l);
+ 				float n = (float)(MathHelper.atan2(l, h) * 180.0 / (float) Math.PI) - 90.0F;
+ 				float o = (float)(-(MathHelper.atan2(k, m) * 180.0 / (float) Math.PI));
+ 				this.sideHeadPitches[i] = this.getNextAngle(this.sideHeadPitches[i], o, 40.0F);
+ 				this.sideHeadYaws[i] = this.getNextAngle(this.sideHeadYaws[i], n, 10.0F);
+ 			} else {
+@@ -190,13 +190,13 @@
+ 		if (this.getInvulnerabilityTime() > 0) {
+ 			for (int jxx = 0; jxx < 3; jxx++) {
+ 				this.world
+ 					.addParticle(
+ 						ParticleType.MOB_SPELL,
+-						this.x + this.random.nextGaussian() * 1.0,
++						this.x + this.random.nextGaussian(),
+ 						this.y + (double)(this.random.nextFloat() * 3.3F),
+-						this.z + this.random.nextGaussian() * 1.0,
++						this.z + this.random.nextGaussian(),
+ 						0.7F,
+ 						0.7F,
+ 						0.9F
+ 					);
+ 			}
+@@ -408,11 +408,11 @@
+ 					return false;
+ 				}
+ 			}
+ 
+ 			Entity entity = damageSource.getAttacker();
+-			if (entity != null && !(entity instanceof PlayerEntity) && entity instanceof LivingEntity && ((LivingEntity)entity).getGroup() == this.getGroup()) {
++			if (!(entity instanceof PlayerEntity) && entity instanceof LivingEntity && ((LivingEntity) entity).getGroup() == this.getGroup()) {
+ 				return false;
+ 			} else {
+ 				if (this.field_5378 <= 0) {
+ 					this.field_5378 = 20;
+ 				}

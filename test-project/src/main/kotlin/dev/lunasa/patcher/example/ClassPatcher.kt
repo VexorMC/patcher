@@ -3,12 +3,8 @@ package dev.lunasa.patcher.example
 import com.google.common.io.ByteArrayDataInput
 import com.google.common.io.ByteStreams
 import com.nothome.delta.GDiffPatcher
-import net.minecraft.launchwrapper.LaunchClassLoader
 import org.apache.logging.log4j.LogManager
 import java.io.IOException
-import java.util.jar.JarEntry
-import java.util.jar.JarInputStream
-import java.util.regex.Pattern
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
@@ -26,11 +22,11 @@ object ClassPatcher {
         logger.info("Reading entries")
         do {
             try {
-                logger.info("Reading entry")
                 val entry = jis.nextEntry ?: break
                     val cp = readPatch(entry, jis)
                     cp.let {
-                        patches.put(it.cleanName, it)
+                        patches.put(it.cleanName.replace(".class", ""), it)
+                        logger.info("Reading entry - ${it.cleanName} -> ${it.modifiedName}")
                     }
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -66,7 +62,9 @@ object ClassPatcher {
             return patchCache[name]!!
         }
 
-        val patch = patches[mappedName]!!
+        println("$name - $mappedName")
+
+        val patch = patches[mappedName] ?: return inputData
 
         var transformed: ByteArray = inputData
 

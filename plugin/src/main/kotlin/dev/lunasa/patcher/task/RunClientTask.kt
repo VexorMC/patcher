@@ -5,6 +5,7 @@ import dev.lunasa.patcher.extension.PatcherExtension
 import dev.lunasa.patcher.model.MinecraftManifest
 import dev.lunasa.patcher.model.MinecraftManifest.gson
 import dev.lunasa.patcher.model.VersionData
+import dev.lunasa.patcher.util.lifecycle
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import java.net.URI
@@ -14,13 +15,14 @@ abstract class RunClientTask : JavaExec() {
 
     @TaskAction
     override fun exec() {
+        lifecycle(logger, "Starting Minecraft client version ${extension.minecraftVersion.get()}", "ex")
+
         val mcManifest = MinecraftManifest.fromId(extension.minecraftVersion.get()) ?: throw RuntimeException("Unknown version specified (${extension.minecraftVersion.get()})")
 
         val manifest = gson.fromJson(
             URI.create(mcManifest.url).toURL().openStream().reader().readText(),
             VersionData::class.java
         ) ?: throw RuntimeException("Failed to fetch version manifest")
-
 
         jvmArgs("-Djava.library.path=${Constants.Cache.resolve("${manifest.id}/natives")}")
 
@@ -43,10 +45,6 @@ abstract class RunClientTask : JavaExec() {
         val sourceSets = project.extensions.findByType(org.gradle.api.plugins.JavaPluginExtension::class.java)?.sourceSets
         val compiledJava = sourceSets?.flatMap { it.output.files }
         val resources = sourceSets?.flatMap { it.resources }
-
-        resources?.forEach {
-            logger.lifecycle(it.absolutePath)
-        }
 
         classpath(
             project.configurations.getByName("runtimeClasspath"),

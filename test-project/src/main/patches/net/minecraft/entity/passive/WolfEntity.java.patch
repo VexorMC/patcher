@@ -1,0 +1,130 @@
+--- WolfEntity.java
++++ WolfEntity.java
+@@ -60,16 +60,16 @@
+ 		this.goals.add(9, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
+ 		this.goals.add(9, new LookAroundGoal(this));
+ 		this.attackGoals.add(1, new TrackOwnerAttackerGoal(this));
+ 		this.attackGoals.add(2, new AttackWithOwnerGoal(this));
+ 		this.attackGoals.add(3, new RevengeGoal(this, true));
+-		this.attackGoals.add(4, new FollowTargetIfTamedGoal(this, AnimalEntity.class, false, new Predicate<Entity>() {
++		this.attackGoals.add(4, new FollowTargetIfTamedGoal<>(this, AnimalEntity.class, false, new Predicate<Entity>() {
+ 			public boolean apply(Entity entity) {
+ 				return entity instanceof SheepEntity || entity instanceof RabbitEntity;
+ 			}
+ 		}));
+-		this.attackGoals.add(5, new FollowTargetGoal(this, SkeletonEntity.class, false));
++		this.attackGoals.add(5, new FollowTargetGoal<>(this, SkeletonEntity.class, false));
+ 		this.setTamed(false);
+ 	}
+ 
+ 	@Override
+ 	protected void initializeAttributes() {
+@@ -101,13 +101,13 @@
+ 	}
+ 
+ 	@Override
+ 	protected void initDataTracker() {
+ 		super.initDataTracker();
+-		this.dataTracker.track(18, new Float(this.getHealth()));
+-		this.dataTracker.track(19, new Byte((byte)0));
+-		this.dataTracker.track(20, new Byte((byte)DyeColor.RED.getId()));
++		this.dataTracker.track(18, this.getHealth());
++		this.dataTracker.track(19, (byte)0);
++		this.dataTracker.track(20, (byte)DyeColor.RED.getId());
+ 	}
+ 
+ 	@Override
+ 	protected void playStepSound(BlockPos blockPos, Block block) {
+ 		this.playSound("mob.wolf.step", 0.15F, 1.0F);
+@@ -290,13 +290,12 @@
+ 	@Override
+ 	public boolean method_2537(PlayerEntity playerEntity) {
+ 		ItemStack itemStack = playerEntity.inventory.getMainHandStack();
+ 		if (this.isTamed()) {
+ 			if (itemStack != null) {
+-				if (itemStack.getItem() instanceof FoodItem) {
+-					FoodItem foodItem = (FoodItem)itemStack.getItem();
+-					if (foodItem.isMeat() && this.dataTracker.getFloat(18) < 20.0F) {
++				if (itemStack.getItem() instanceof FoodItem foodItem) {
++                    if (foodItem.isMeat() && this.dataTracker.getFloat(18) < 20.0F) {
+ 						if (!playerEntity.abilities.creativeMode) {
+ 							itemStack.count--;
+ 						}
+ 
+ 						this.heal((float)foodItem.getHungerPoints(itemStack));
+@@ -378,11 +377,11 @@
+ 	@Override
+ 	public boolean isBreedingItem(ItemStack itemStack) {
+ 		if (itemStack == null) {
+ 			return false;
+ 		} else {
+-			return !(itemStack.getItem() instanceof FoodItem) ? false : ((FoodItem)itemStack.getItem()).isMeat();
++			return itemStack.getItem() instanceof FoodItem && ((FoodItem) itemStack.getItem()).isMeat();
+ 		}
+ 	}
+ 
+ 	@Override
+ 	public int getLimitPerChunk() {
+@@ -411,11 +410,11 @@
+ 	}
+ 
+ 	public WolfEntity breed(PassiveEntity passiveEntity) {
+ 		WolfEntity wolfEntity = new WolfEntity(this.world);
+ 		String string = this.getOwnerId();
+-		if (string != null && string.trim().length() > 0) {
++		if (string != null && !string.trim().isEmpty()) {
+ 			wolfEntity.method_2713(string);
+ 			wolfEntity.setTamed(true);
+ 		}
+ 
+ 		return wolfEntity;
+@@ -433,18 +432,17 @@
+ 	public boolean canBreedWith(AnimalEntity animalEntity) {
+ 		if (animalEntity == this) {
+ 			return false;
+ 		} else if (!this.isTamed()) {
+ 			return false;
+-		} else if (!(animalEntity instanceof WolfEntity)) {
++		} else if (!(animalEntity instanceof WolfEntity wolfEntity)) {
+ 			return false;
+ 		} else {
+-			WolfEntity wolfEntity = (WolfEntity)animalEntity;
+-			if (!wolfEntity.isTamed()) {
++            if (!wolfEntity.isTamed()) {
+ 				return false;
+ 			} else {
+-				return wolfEntity.isSitting() ? false : this.isInLove() && wolfEntity.isInLove();
++				return !wolfEntity.isSitting() && this.isInLove() && wolfEntity.isInLove();
+ 			}
+ 		}
+ 	}
+ 
+ 	public boolean method_2875() {
+@@ -457,22 +455,19 @@
+ 	}
+ 
+ 	@Override
+ 	public boolean canAttackWithOwner(LivingEntity livingEntity, LivingEntity livingEntity2) {
+ 		if (!(livingEntity instanceof CreeperEntity) && !(livingEntity instanceof GhastEntity)) {
+-			if (livingEntity instanceof WolfEntity) {
+-				WolfEntity wolfEntity = (WolfEntity)livingEntity;
+-				if (wolfEntity.isTamed() && wolfEntity.getOwner() == livingEntity2) {
++			if (livingEntity instanceof WolfEntity wolfEntity) {
++                if (wolfEntity.isTamed() && wolfEntity.getOwner() == livingEntity2) {
+ 					return false;
+ 				}
+ 			}
+ 
+-			return livingEntity instanceof PlayerEntity
+-					&& livingEntity2 instanceof PlayerEntity
+-					&& !((PlayerEntity)livingEntity2).shouldDamagePlayer((PlayerEntity)livingEntity)
+-				? false
+-				: !(livingEntity instanceof HorseBaseEntity) || !((HorseBaseEntity)livingEntity).isTame();
++			return (!(livingEntity instanceof PlayerEntity)
++                    || !(livingEntity2 instanceof PlayerEntity)
++                    || ((PlayerEntity) livingEntity2).shouldDamagePlayer((PlayerEntity) livingEntity)) && (!(livingEntity instanceof HorseBaseEntity) || !((HorseBaseEntity) livingEntity).isTame());
+ 		} else {
+ 			return false;
+ 		}
+ 	}
+ 

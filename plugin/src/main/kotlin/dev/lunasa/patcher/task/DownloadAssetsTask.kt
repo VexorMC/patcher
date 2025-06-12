@@ -7,6 +7,7 @@ import dev.lunasa.patcher.model.MinecraftManifest
 import dev.lunasa.patcher.model.MinecraftManifest.gson
 import dev.lunasa.patcher.model.VersionData
 import dev.lunasa.patcher.util.Downloader
+import dev.lunasa.patcher.util.lifecycle
 import kotlinx.coroutines.*
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -15,7 +16,6 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URL
-import java.util.concurrent.atomic.AtomicInteger
 
 private const val RESOURCES_URL = "https://resources.download.minecraft.net/"
 
@@ -48,25 +48,19 @@ abstract class DownloadAssetsTask : DefaultTask() {
         }
 
         val assetObjects = gson.fromJson(assetIndexContent, JsonObject::class.java)["objects"].asJsonObject
-        val downloadedCount = AtomicInteger(0)
-        val totalAssets = assetObjects.size()
 
         coroutineScope {
             assetObjects.entrySet().map { (_, value) ->
                 async(Dispatchers.IO) {
-                    downloadAssetAsync(value.asJsonObject, downloadedCount, totalAssets)
+                    downloadAssetAsync(value.asJsonObject)
                 }
             }.awaitAll()
         }
 
-        logger.lifecycle("[Patcher] All assets downloaded successfully.")
+        lifecycle(logger, "Successfully downloaded assets for Minecraft version $version")
     }
 
-    private suspend fun downloadAssetAsync(
-        asset: JsonObject,
-        downloadedCount: AtomicInteger,
-        totalAssets: Int
-    ) = withContext(Dispatchers.IO) {
+    private suspend fun downloadAssetAsync(asset: JsonObject) = withContext(Dispatchers.IO) {
         val hash = asset["hash"].asString
         val size = asset["size"].asLong
         val folder = assetsDirectory.resolve("objects/${hash.substring(0, 2)}")
@@ -78,16 +72,6 @@ abstract class DownloadAssetsTask : DefaultTask() {
 
             file.parentFile.mkdirs()
             file.writeBytes(response)
-
-            val progress = downloadedCount.incrementAndGet().toFloat() / totalAssets
-            updateProgress(progress)
         }
-    }
-
-    private fun updateProgress(progress: Float) {
-        val totalBoxes = 30
-        val filledBoxes = (progress * totalBoxes).toInt()
-        val bar = "=".repeat(filledBoxes) + " ".repeat(totalBoxes - filledBoxes)
-        logger.lifecycle("\r[Patcher] Assets: [$bar] (${"%.2f".format(progress * 100)}%)")
     }
 }

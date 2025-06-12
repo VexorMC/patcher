@@ -14,7 +14,6 @@ import dev.lunasa.patcher.task.GeneratePatchesTask
 import dev.lunasa.patcher.task.RemapJarTask
 import dev.lunasa.patcher.task.RunClientTask
 import dev.lunasa.patcher.util.NativesTask
-import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -22,10 +21,8 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.get
 import java.io.File
 import java.net.URI
-import java.net.URL
 
 class Patcher : Plugin<Project> {
     override fun apply(project: Project) {

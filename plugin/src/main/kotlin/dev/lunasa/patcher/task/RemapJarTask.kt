@@ -3,6 +3,7 @@ package dev.lunasa.patcher.task
 import dev.lunasa.patcher.constant.Constants
 import dev.lunasa.patcher.extension.PatcherExtension
 import dev.lunasa.patcher.util.Mapper
+import dev.lunasa.patcher.util.lifecycle
 import dev.lunasa.patcher.util.openZipFileSystem
 import net.fabricmc.tinyremapper.NonClassCopyMode
 import net.fabricmc.tinyremapper.OutputConsumerPath
@@ -60,18 +61,14 @@ abstract class RemapJarTask : DefaultTask() {
             // We need the obfuscated client jar in the classpath
             downloadedJar.toPath())
 
-        logger.lifecycle("[Patcher/RemapJar] Remapping ${inputJar.get().nameWithoutExtension} from ${sourceNamespace.get()} to ${targetNamespace.get()}")
+        lifecycle(logger, "Remapping ${inputJar.get().nameWithoutExtension} from ${sourceNamespace.get()} to ${targetNamespace.get()}")
 
         val tag = remapper.createInputTag()
 
-        logger.lifecycle("[Patcher/RemapJar] Tag: $tag")
-
         remapper.readClassPath(*classpath.toTypedArray())
 
-        logger.lifecycle("[Patcher/RemapJar] Reading....")
         remapper.readInputs(tag, inputJar.get().toPath())
 
-        logger.lifecycle("[Patcher/RemapJar] Writing....")
         try {
             OutputConsumerPath.Builder(outputJar.get().toPath()).build().use { outputConsumer ->
                 outputConsumer.addNonClassFiles(inputJar.get().toPath(),
@@ -84,6 +81,6 @@ abstract class RemapJarTask : DefaultTask() {
 
         remapper.finish()
 
-        logger.lifecycle("[Patcher/RemapJar] Remapped successfully")
+        lifecycle(logger, "Remapped successfully")
     }
 }

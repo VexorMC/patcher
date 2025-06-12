@@ -42,8 +42,6 @@ fun extractZipFile(zipFile: String, outputDirectory: String, exclusions: List<St
                         }
                     }
                 }
-            } else {
-                println("Excluding ${zipEntry.name}")
             }
 
             zipEntry = zis.nextEntry

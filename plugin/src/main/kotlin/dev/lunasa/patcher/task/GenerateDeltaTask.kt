@@ -1,6 +1,7 @@
 package dev.lunasa.patcher.task
 
 import com.nothome.delta.Delta
+import dev.lunasa.patcher.util.lifecycle
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFile
@@ -13,6 +14,9 @@ import java.io.File
 import java.util.jar.JarFile
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import kotlin.io.nameWithoutExtension
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class GenerateDeltaTask : DefaultTask() {
@@ -25,69 +29,76 @@ abstract class GenerateDeltaTask : DefaultTask() {
     @get:OutputFile
     abstract val outputJar: Property<File>
 
+    @OptIn(ExperimentalTime::class)
     @TaskAction
     fun generateDeltas() {
-        val delta = Delta()
-        var counter = 0
-        val patchEntries = mutableListOf<Pair<String, ByteArray>>()
+        lifecycle(logger, "Generating binary patches...")
 
-        val originalZip = JarFile(originalJar.get())
-        val modifiedZip = JarFile(modifiedJar.get())
+        val time = measureTime {
+            val delta = Delta()
+            var counter = 0
+            val patchEntries = mutableListOf<Pair<String, ByteArray>>()
 
-        if (outputJar.get().exists()) outputJar.get().delete()
+            val originalZip = JarFile(originalJar.get())
+            val modifiedZip = JarFile(modifiedJar.get())
 
-        val outputStream = ZipOutputStream(outputJar.get().outputStream())
+            if (outputJar.get().exists()) outputJar.get().delete()
 
-        modifiedZip.entries().asSequence().forEach { modifiedEntry ->
-            val originalEntry = originalZip.getEntry(modifiedEntry.name)
+            val outputStream = ZipOutputStream(outputJar.get().outputStream())
 
-            if (originalEntry != null) {
-                val cleanBytes = ByteStreams.toByteArray(originalZip.getInputStream(originalEntry))
-                val modifiedBytes = ByteStreams.toByteArray(modifiedZip.getInputStream(modifiedEntry))
+            modifiedZip.entries().asSequence().forEach { modifiedEntry ->
+                val originalEntry = originalZip.getEntry(modifiedEntry.name)
 
-                if (!cleanBytes.contentEquals(modifiedBytes)) {
-                    val deltaBytes = delta.compute(cleanBytes, modifiedBytes)
+                if (originalEntry != null) {
+                    val cleanBytes = ByteStreams.toByteArray(originalZip.getInputStream(originalEntry))
+                    val modifiedBytes = ByteStreams.toByteArray(modifiedZip.getInputStream(modifiedEntry))
 
-                    if (!deltaBytes.contentEquals(cleanBytes)) {
-                        val className = modifiedEntry.name.replace("/", ".").removeSuffix(".class")
+                    if (!cleanBytes.contentEquals(modifiedBytes)) {
+                        val deltaBytes = delta.compute(cleanBytes, modifiedBytes)
 
-                        val output: ByteArrayDataOutput = ByteStreams.newDataOutput()
+                        if (!deltaBytes.contentEquals(cleanBytes)) {
+                            val className = modifiedEntry.name.replace("/", ".").removeSuffix(".class")
 
-                        output.writeUTF(className)           // Class name
-                        output.writeUTF(originalEntry.name)  // Clean class name
-                        output.writeUTF(modifiedEntry.name)  // Modified class name
+                            val output: ByteArrayDataOutput = ByteStreams.newDataOutput()
 
-                        output.writeInt(deltaBytes.size)
-                        output.write(deltaBytes)
+                            output.writeUTF(className) // class name
+                            output.writeUTF(originalEntry.name) // clean class name
+                            output.writeUTF(modifiedEntry.name) // new class name
 
-                        patchEntries.add(className to output.toByteArray())
-                        counter++
+                            output.writeInt(deltaBytes.size)
+                            output.write(deltaBytes)
+
+                            patchEntries.add(className to output.toByteArray())
+                            counter++
+                        }
                     }
+                } else {
+                    val modifiedInputStream = modifiedZip.getInputStream(modifiedEntry)
+                    val zipEntry = ZipEntry(modifiedEntry.name)
+                    outputStream.putNextEntry(zipEntry)
+                    modifiedInputStream.copyTo(outputStream)
+                    outputStream.closeEntry()
                 }
-            } else {
-                val modifiedInputStream = modifiedZip.getInputStream(modifiedEntry)
-                val zipEntry = ZipEntry(modifiedEntry.name)
-                outputStream.putNextEntry(zipEntry)
-                modifiedInputStream.copyTo(outputStream)
+            }
+
+            if (patchEntries.isNotEmpty()) {
+                val patchZipEntry = ZipEntry("patches.zip")
+                outputStream.putNextEntry(patchZipEntry)
+
+                val patchZipStream = ZipOutputStream(outputStream)
+                patchEntries.forEach { patchData ->
+                    val patchEntry = ZipEntry("${patchData.first}.xdelta")
+                    patchZipStream.putNextEntry(patchEntry)
+                    patchZipStream.write(patchData.second)
+                    patchZipStream.closeEntry()
+                }
+
                 outputStream.closeEntry()
             }
+
+            outputStream.close()
         }
 
-        if (patchEntries.isNotEmpty()) {
-            val patchZipEntry = ZipEntry("patches.zip")
-            outputStream.putNextEntry(patchZipEntry)
-
-            val patchZipStream = ZipOutputStream(outputStream)
-            patchEntries.forEach { patchData ->
-                val patchEntry = ZipEntry("patch_${patchData.first}.bin")
-                patchZipStream.putNextEntry(patchEntry)
-                patchZipStream.write(patchData.second)
-                patchZipStream.closeEntry()
-            }
-
-            outputStream.closeEntry()
-        }
-
-        outputStream.close()
+        lifecycle(logger, "Generated binary patches in $time")
     }
 }

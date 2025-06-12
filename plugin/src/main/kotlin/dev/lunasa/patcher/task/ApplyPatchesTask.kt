@@ -3,6 +3,7 @@ package dev.lunasa.patcher.task
 import com.github.difflib.DiffUtils
 import com.github.difflib.UnifiedDiffUtils
 import com.github.difflib.patch.Patch
+import dev.lunasa.patcher.util.lifecycle
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputDirectory
@@ -10,6 +11,8 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class ApplyPatchesTask : DefaultTask() {
@@ -19,6 +22,7 @@ abstract class ApplyPatchesTask : DefaultTask() {
     @get:OutputDirectory
     abstract val targetDir: Property<File>
 
+    @OptIn(ExperimentalTime::class)
     @TaskAction
     fun applyPatches() {
         val patchesDir = patchesDir.get()
@@ -28,28 +32,35 @@ abstract class ApplyPatchesTask : DefaultTask() {
             targetDir.mkdirs()
         }
 
-        patchesDir.walk().forEach { patchFile ->
-            if (patchFile.isFile) {
-                val relativePath = patchesDir.toPath().relativize(File(patchFile.parentFile, patchFile.name.replace(".patch", "")).toPath())
-                val targetFilePath = File(targetDir, relativePath.toString())
+        var patchedCount = 0
 
-                targetFilePath.parentFile.mkdirs()
+        val time = measureTime {
+            patchesDir.walk().forEach { patchFile ->
+                if (patchFile.isFile) {
+                    val relativePath = patchesDir.toPath()
+                        .relativize(File(patchFile.parentFile, patchFile.name.replace(".patch", "")).toPath())
+                    val targetFilePath = File(targetDir, relativePath.toString())
 
-                val patchLines = patchFile.readLines()
+                    targetFilePath.parentFile.mkdirs()
 
-                val patch: Patch<String> = UnifiedDiffUtils.parseUnifiedDiff(patchLines)
+                    val patchLines = patchFile.readLines()
 
-                val originalFile = File(targetDir, relativePath.toString())
-                if (originalFile.exists()) {
-                    val originalLines = originalFile.readLines()
+                    val patch: Patch<String> = UnifiedDiffUtils.parseUnifiedDiff(patchLines)
 
-                    val result = DiffUtils.patch(originalLines, patch)
+                    val originalFile = File(targetDir, relativePath.toString())
+                    if (originalFile.exists()) {
+                        val originalLines = originalFile.readLines()
 
-                    originalFile.writeText(result.joinToString("\n"))
+                        val result = DiffUtils.patch(originalLines, patch)
 
-                    logger.lifecycle("[Patcher] Applied patch to ${originalFile.name}")
+                        originalFile.writeText(result.joinToString("\n"))
+
+                        patchedCount += 1
+                    }
                 }
             }
         }
+
+        lifecycle(logger, "Applied $patchedCount patches in $time ms", "diff")
     }
 }

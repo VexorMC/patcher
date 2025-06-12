@@ -2,6 +2,7 @@ package dev.lunasa.patcher.task
 
 import dev.lunasa.patcher.decompile.VineFlowerDecompiler
 import dev.lunasa.patcher.util.extractZipFile
+import dev.lunasa.patcher.util.lifecycle
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFile
@@ -22,9 +23,10 @@ abstract class GenSourcesTask : DefaultTask() {
 
     @TaskAction
     fun decompile() {
-        logger.lifecycle("[Patcher] Decompiling")
+        lifecycle(logger, "Decompiling ${inputJar.get().nameWithoutExtension}...")
 
         val tempFile = File.createTempFile("patcher-decompile", ".jar")
+
         VineFlowerDecompiler.decompile(
             project,
             inputJar.get(),
@@ -34,6 +36,6 @@ abstract class GenSourcesTask : DefaultTask() {
         extractZipFile(tempFile.path, cacheOutputFolder.get().path, listOf("META-INF"))
         extractZipFile(tempFile.path, outputFolder.get().path, listOf("META-INF"))
 
-        logger.lifecycle("[Patcher] Decompiled and saved successfully")
+        lifecycle(logger, "Decompiled and saved successfully")
     }
 }

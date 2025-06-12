@@ -33,10 +33,11 @@ object NativesTask {
                             val characters = "=".repeat(neededBoxes)
                             val whitespaces = " ".repeat(totalBoxes - neededBoxes)
 
-                            project.logger.lifecycle(
-                                "[Patcher] Natives: [$characters$whitespaces] (${it})\r"
+                            print(
+                                "Minecraft ${manifest.id} Natives: [$characters$whitespaces] (${"%.2f".format(it * 100)}%)\r"
                             )
                         }
+                        println("")
                         var excludeList = emptyList<String>()
                         if (it.extract != null) {
                             excludeList = it.extract.exclude
