@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "2.0.20"
     `kotlin-dsl`
     `java-gradle-plugin`
+    `maven-publish`
 }
 
 group = "dev.lunasa"
@@ -36,6 +37,19 @@ gradlePlugin {
         create("dev.lunasa.patcher") {
             id = "dev.lunasa.patcher"
             implementationClass = "dev.lunasa.patcher.Patcher"
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/VexorMC/patcher")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
         }
     }
 }
